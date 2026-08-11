@@ -32,6 +32,15 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
+
+# Operator's raw drop folder. These are copied into public/images/, which is the
+# folder the app actually reads, so committing both would double the repo size.
+/Sample_images/
+
+# Raw Google Drive exports. The images get extracted into public/images/; keeping
+# the archive too would store every image twice.
+/drive-download-*.zip
 
 # vercel
 .vercel
