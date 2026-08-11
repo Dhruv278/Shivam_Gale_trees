@@ -52,8 +52,30 @@ The QR filename keeps your original name verbatim so you can match a printed cod
 image. The URL slug is lowercased and hyphenated so links stay clean.
 
 If two files would produce the same name, the second gets a `-2` suffix and the manifest build
-prints a warning. Files are processed in sorted order, so these suffixes never move between
-builds — an already-printed code keeps pointing at the same image.
+prints a warning.
+
+## `src/data/slug-lock.json` — commit this file
+
+**This is the file that guarantees printed QR codes never break.** It records which slug belongs to
+which filename, permanently.
+
+Deriving slugs from the folder contents alone is *not* safe. Suppose `front-b.jpg` is live and its
+code is printed. Later you add `Front B.jpg` — which normalises to the same `front-b`. Whichever
+filename sorts first wins, so the newcomer takes `front-b` and the original silently becomes
+`front-b-2`. Every printed label for `front-b` would then open **the wrong poster** — worse than a
+dead link, because it looks like it worked.
+
+The lock prevents this:
+
+- A filename already in the lock keeps its slug forever. New files are only ever *added*.
+- Deleting an image moves it to `retired` and **keeps its slug reserved**, so the slug is never
+  recycled onto a different image. An old code 404s, which is the honest outcome.
+- Re-adding a deleted image gives it its original slug back.
+- If a locked slug ever would change, `npm run manifest` **fails the build** rather than producing
+  broken codes.
+
+So: after adding images, run `npm run manifest` and **commit both** `manifest.json` and
+`slug-lock.json`. If you lose the lock file, previously printed codes are no longer guaranteed.
 
 ## Commands
 

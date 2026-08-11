@@ -108,9 +108,7 @@ Two names are derived per image and must never be conflated:
 `qrName` preserves the original basename verbatim — that is the operator's stated requirement.
 `slug` is lowercased, accent-stripped, and hyphenated so URLs stay clean and ASCII.
 
-**Collision handling.** Files are sorted before processing so suffixes are deterministic across
-builds; otherwise filesystem ordering could reshuffle which image owns `front-label` between
-deploys and invalidate already-printed codes.
+**Collision handling.**
 
 - `Front.jpg` + `Front.png` both want `Front.png` → second becomes `Front-2.png`
 - `A B.jpg` + `a-b.jpg` both slug to `a-b` → second becomes `a-b-2`
@@ -119,6 +117,36 @@ QR filename deduplication is **case-insensitive**, because extracting a ZIP on W
 collapses case and would silently drop a QR code from the print run.
 
 Every collision is reported as a build warning rather than silently applied.
+
+### Slug permanence: `src/data/slug-lock.json`
+
+Sorting the file list makes suffixes deterministic **for a fixed set of files**, but that is not
+enough. Sorting is *not* stable under insertion:
+
+`front-b.jpg` is live and printed as `front-b`. Later `Front B.jpg` is added and normalises to the
+same slug. `Front B.jpg` sorts first (uppercase precedes lowercase), so it takes `front-b` and the
+incumbent is pushed to `front-b-2`. Every printed label for `front-b` now opens **a different
+poster**. This was reproduced before the fix.
+
+That is the worst failure this project can produce — not a dead link, but a confidently wrong one.
+So assignments are persisted in a committed lock file and never recomputed:
+
+| Situation | Behaviour |
+|---|---|
+| File already in the lock | Keeps its slug and qrName permanently |
+| New file | Assigned, deduped against every name ever issued |
+| New file collides with a locked slug | **Newcomer** takes the suffix; incumbent never moves |
+| File deleted | Moved to `retired`; its slug stays reserved forever |
+| Deleted file re-added | Reclaims its original slug |
+| A locked slug would change | `npm run manifest` exits non-zero and aborts the build |
+
+Reserving retired slugs is deliberate: recycling one would make an old printed code open the wrong
+image, whereas holding it makes that code 404. A 404 is recoverable; a wrong answer is not.
+
+Verified: introducing the lock left all 45 existing slugs byte-identical, and simulating additions
+of `amaltas.png`, `AMALTAS.webp`, `Neem 2.jpg`, `neem-2.jpg` moved zero incumbent slugs.
+
+**Operational requirement:** `slug-lock.json` must be committed. Losing it forfeits the guarantee.
 
 ## Portal (`/`)
 

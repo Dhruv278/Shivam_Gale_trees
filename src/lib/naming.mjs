@@ -65,31 +65,75 @@ function dedupe(candidate, taken, suffixTarget) {
   }
 }
 
+/** A lock with nothing assigned yet, for the very first build. */
+export const EMPTY_LOCK = { version: 1, assignments: {}, retired: {} };
+
+/** Stable key order so the committed lock file produces clean git diffs. */
+function sortKeys(obj) {
+  return Object.fromEntries(Object.keys(obj).sort().map((k) => [k, obj[k]]));
+}
+
 /**
- * Build manifest entries from a list of filenames.
+ * Build manifest entries from a list of filenames, honouring a persisted lock.
  *
- * Files are sorted first so collision suffixes are deterministic across builds -
- * otherwise filesystem ordering could reshuffle which image owns "front-label"
- * between deploys, invalidating already-printed QR codes.
+ * WHY THE LOCK EXISTS
+ * -------------------
+ * QR codes are printed on physical labels, so a slug must map to the same image
+ * forever. Deriving slugs purely from the current file list does NOT give that:
+ * add `Front B.jpg` alongside an existing `front-b.jpg` and both normalise to
+ * `front-b`. Whichever sorts first wins, so the newcomer can take the slug and
+ * push the incumbent to `front-b-2` - silently re-pointing an already-printed
+ * code at a different poster. That is worse than a 404, because it is wrong
+ * rather than absent.
+ *
+ * So assignments are recorded in a committed lock file and never recomputed:
+ *
+ *   - a file already in the lock keeps its slug and qrName, always;
+ *   - only genuinely new files are assigned, deduped against every name ever
+ *     handed out;
+ *   - a removed file is moved to `retired`, and its slug stays reserved so it is
+ *     never recycled onto a different image. An old QR then 404s, which is the
+ *     honest outcome;
+ *   - a retired file that comes back reclaims its original slug.
  *
  * @param {string[]} fileNames
- * @returns {{entries: Array, warnings: string[]}}
+ * @param {{version?: number, assignments?: object, retired?: object}} lock
+ * @returns {{entries: Array, warnings: string[], lock: object}}
  */
-export function buildManifest(fileNames) {
-  const supported = fileNames.filter(isSupported).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+export function buildManifest(fileNames, lock = EMPTY_LOCK) {
+  const assignments = { ...(lock?.assignments ?? {}) };
+  const retired = { ...(lock?.retired ?? {}) };
 
+  const supported = fileNames.filter(isSupported).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  const present = new Set(supported);
+  const warnings = [];
+
+  // Reserve every name ever issued - live AND retired - so nothing is recycled.
   const usedSlugs = new Set();
   const usedQrNames = new Set();
-  const warnings = [];
-  const entries = [];
+  for (const rec of [...Object.values(assignments), ...Object.values(retired)]) {
+    usedSlugs.add(rec.slug.toLowerCase());
+    usedQrNames.add(rec.qrName.toLowerCase());
+  }
 
+  // A file that was removed and has come back reclaims its original slug.
   for (const file of supported) {
+    if (!assignments[file] && retired[file]) {
+      assignments[file] = retired[file];
+      delete retired[file];
+      warnings.push(`Restored "${file}" to its original slug "${assignments[file].slug}".`);
+    }
+  }
+
+  // Assign only files the lock has never seen.
+  for (const file of supported) {
+    if (assignments[file]) continue;
     const { base } = splitName(file);
 
     const slugWanted = slugify(base);
     const slug = dedupe(slugWanted, usedSlugs, (c, n) => `${c}-${n}`);
     if (slug !== slugWanted) {
-      warnings.push(`Slug collision: "${file}" wanted "${slugWanted}", using "${slug}".`);
+      warnings.push(`Slug collision: "${file}" wanted "${slugWanted}", assigned "${slug}".`);
     }
 
     const qrWanted = `${base}.png`;
@@ -98,13 +142,35 @@ export function buildManifest(fileNames) {
       return `${b}-${n}.png`;
     });
     if (qrName !== qrWanted) {
-      warnings.push(`QR filename collision: "${file}" wanted "${qrWanted}", using "${qrName}".`);
+      warnings.push(`QR filename collision: "${file}" wanted "${qrWanted}", assigned "${qrName}".`);
     }
 
-    entries.push({ file, slug, qrName, name: base });
+    assignments[file] = { slug, qrName };
   }
 
-  return { entries, warnings };
+  // Retire assignments whose file is gone. Their names stay reserved above.
+  for (const file of Object.keys(assignments)) {
+    if (present.has(file)) continue;
+    retired[file] = assignments[file];
+    delete assignments[file];
+    warnings.push(
+      `Retired "${file}" (no longer in the folder). Slug "${retired[file].slug}" stays reserved, ` +
+        'so any printed code for it 404s rather than opening a different image.',
+    );
+  }
+
+  const entries = supported.map((file) => ({
+    file,
+    slug: assignments[file].slug,
+    qrName: assignments[file].qrName,
+    name: splitName(file).base,
+  }));
+
+  return {
+    entries,
+    warnings,
+    lock: { version: 1, assignments: sortKeys(assignments), retired: sortKeys(retired) },
+  };
 }
 
 /** Absolute viewer URL encoded into a QR code. */
