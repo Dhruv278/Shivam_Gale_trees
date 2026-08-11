@@ -25,20 +25,55 @@ PDFs are out of scope because the operator has none. `SUPPORTED_EXTENSIONS` in
 | Decision | Choice | Rationale |
 |---|---|---|
 | Framework | Next.js 16.3.0, React 19, JavaScript, Tailwind v4 | Operator's explicit request |
-| Hosting | Vercel | GitHub Pages cannot serve dynamic routes; see below |
+| Build output | **Static export** (`output: 'export'`) | Host-portable; nothing here needs a server |
+| Hosting | **Cloudflare Pages** (free) | Free, permits commercial use, unmetered bandwidth |
 | Viewer URL | `/view/<slug>` path segment | Clean printable URLs |
-| Image storage | Full-quality originals committed to `public/images/` | No quality loss; clears every documented limit — see Image storage |
-| Deploy method | **Vercel Git integration only, never `vercel deploy` CLI** | The CLI path caps static uploads at 100 MB on Hobby |
+| Image storage | Full-quality originals committed to `public/images/` | No quality loss; see Image storage |
+| Deploy method | Connect the GitHub repo to Cloudflare Pages | No CLI upload caps; builds from git |
 | QR generation | Client-side, in-browser | No serverless timeout risk on a 1,700-item run |
 | QR settings | 512×512 PNG, error correction M, 2-module quiet zone | Standard print tradeoff |
 | Image delivery | Plain `<img>`, not `next/image` | Vercel optimization quotas would break scanned codes |
 
-### Why not GitHub Pages
+### Why Cloudflare Pages, and not Vercel
 
-The original plan required GitHub Pages as the only host. A Next.js static export cannot
-prerender `/view/:id` for IDs unknown at build time. Moving to Vercel resolves this and buys
-clean path URLs. Note that once images are committed at build time, all slugs *are* known at
-build time, so GitHub Pages would become viable again — Vercel was chosen anyway for simplicity.
+The QR codes are printed on physical labels, so the URL they encode must keep working
+indefinitely. That makes host durability and terms-of-service risk the deciding factors, not
+developer convenience.
+
+**Vercel Hobby is disqualified.** Vercel's documentation states the Hobby plan "restricts users to
+non-commercial, personal use only." These posters carry GAIL (India) Limited branding on a
+corporate environmental initiative, which is commercial use. A suspension would kill all ~1,700
+printed codes simultaneously. Vercel Pro lifts the restriction at $20/month ($240/year), which
+fails the zero-cost requirement.
+
+**Cloudflare Pages** is free, explicitly permits commercial use, does not meter bandwidth, and
+accepts 20,000 files at up to 25 MiB each — ~1,700 × ~1 MB clears both. Its documented limits do
+not state a total-site-size ceiling, so ~1.8 GB there is verified-by-absence rather than
+verified; if a deploy is rejected on size, see the Fallback section.
+
+**GitHub Pages** is the most institutionally durable free option but has a hard **1 GB** published
+site limit, which full-quality originals exceed. It only becomes viable if the images are
+downscaled, which was rejected (see Image storage).
+
+### Why static export
+
+`output: 'export'` emits a plain `out/` folder. Nothing in this app needs a server: the portal is
+client-side and every viewer page is known at build time. A static folder can be served by
+Cloudflare Pages, GitHub Pages, Netlify, S3, or any web server, so losing a host means copying a
+folder rather than porting an application. For a requirement measured in years, that portability
+*is* the durability strategy.
+
+Verified against the static build served with no Next.js runtime: `/` 200, `/view/<slug>` 200,
+`/images/<file with space>.jpg` 200 at the full 1,042,511 bytes, unknown slug 404, and client-side
+QR generation completing for 45 images in 3.2 s.
+
+### The URL is the real single point of failure
+
+Whatever domain is printed is permanent. A provider subdomain such as `*.pages.dev` ties the codes
+to that provider forever. A custom domain — ideally a subdomain of a domain GAIL already owns —
+would let the site move hosts without reprinting, and is the only true guarantee. The operator
+chose a free `*.pages.dev` subdomain, accepting the lock-in. **Revisit this before printing:** it is
+the cheapest insurance available and the decision cannot be undone afterwards.
 
 ## Architecture
 
@@ -153,27 +188,27 @@ Lossless JPEG re-optimisation saves only 5–15%, which does not change the prob
 
 ### Verified limits (checked 2026-08-11)
 
-| Limit | Vercel Hobby | 1.77 GB verdict |
+| Limit | Cloudflare Pages free | ~1.8 GB verdict |
 |---|---|---|
-| Static file uploads — **CLI deploys only** | 100 MB | ❌ would fail |
-| Build container disk | 32 GB | ✅ clears easily |
-| Build memory | 8 GB | ✅ |
-| Build duration | 45 min | ✅ |
-| Source files per deployment | 15,000 | ✅ 1,700 |
-| Fast Data Transfer | 100 GB/month | ✅ ~100,000 scans/month |
+| Files per deployment | 20,000 | ✅ ~1,700 |
+| Size per file | 25 MiB | ✅ ~1 MB each |
+| Total site size | **not documented** | ⚠️ unverified |
+| Bandwidth | unmetered | ✅ |
+| Builds per month | 500 | ✅ |
+| Commercial use | permitted | ✅ |
 
-**The 100 MB cap is scoped to `vercel deploy` from a workstation.** Git-integration deploys clone
-into a 32 GB build container instead, so the cap does not apply.
+### Measured upload throughput
 
-> **Do not deploy with the Vercel CLI.** That path fails at 100 MB on Hobby. Push to GitHub and let
-> the Git integration build.
+An early push appeared to stall, which prompted a bandwidth concern. That concern was wrong:
+measured `git push` throughput was **19.59 MiB/s** (37.58 MiB written in seconds). The stall was
+GitHub finalising the first push into an empty repository. ~1.8 GB is therefore roughly 90 seconds
+of actual transfer, not hours.
 
 ### Accepted trade-offs
 
 - The repo reaches ~1.8 GB, above GitHub's recommended 1 GB (5 GB is the strong ceiling). It works;
-  pushes, clones, and Vercel's per-build clone all get slower.
-- Vercel does not *explicitly* document a static-asset ceiling for Git deploys, so a small residual
-  unknown remains.
+  pushes, clones, and the host's per-build clone all get slower.
+- Cloudflare Pages does not document a total-site-size ceiling, so that figure is unverified.
 
 ### Fallback
 

@@ -66,18 +66,27 @@ builds — an already-printed code keeps pointing at the same image.
 
 ## Deploying
 
-Push to GitHub and deploy through Vercel's **Git integration**.
+`npm run build` produces a static `out/` folder — plain HTML, CSS and images with no server. Host it
+anywhere.
 
-> **Do not run `vercel deploy` from your machine.** The CLI path caps static uploads at **100 MB**
-> on the Hobby plan, and the images are ~1.8 GB, so it will fail. Git-integration deploys clone into
-> a 32 GB build container instead, which has ample room.
+**Recommended: Cloudflare Pages.** Free, permits commercial use, and does not meter bandwidth.
 
-Set `NEXT_PUBLIC_SITE_URL` in the Vercel project's environment variables to the deployed domain,
-then redeploy so generated codes encode the right host.
+1. Connect this GitHub repo to a new Cloudflare Pages project.
+2. Build command `npm run build`, output directory `out`.
+3. Add `NEXT_PUBLIC_SITE_URL` as an environment variable set to the deployed domain.
+4. Redeploy, then regenerate the QR codes so they encode the right host.
 
-Expect slow pushes and slow builds: the repo carries ~1.8 GB of images and Vercel re-clones it on
-every build. That is the accepted cost of keeping the posters at full resolution so their fine print
-stays readable when zoomed.
+> **Do not use Vercel's free Hobby plan for this.** Vercel's docs restrict Hobby to
+> "non-commercial, personal use only." These are GAIL-branded corporate posters, so a suspension is
+> a real risk — and it would kill every printed QR code at once. Vercel Pro ($20/month) lifts the
+> restriction if you ever want it.
+
+Because the output is static, migrating hosts later means copying the `out/` folder. The one thing
+you *cannot* change after printing is the domain in the QR codes.
+
+> **Strongly consider a custom domain before you print.** A `*.pages.dev` subdomain ties 1,700
+> physical labels to Cloudflare permanently. A subdomain of a domain GAIL already owns costs nothing
+> extra and lets you move hosts forever without reprinting.
 
 ## Layout
 
