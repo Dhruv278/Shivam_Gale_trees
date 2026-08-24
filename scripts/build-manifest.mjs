@@ -1,84 +1,67 @@
 /**
- * Scans public/images and writes src/data/manifest.json.
+ * Photo drop folders x survey -> src/data/manifest.json (per-tree).
+ * Runs via predev/prebuild so dev and production always agree.
  *
- * Runs via the `predev` / `prebuild` npm hooks so dev and production always agree,
- * and so nothing has to touch the filesystem at request time.
+ * public/images/<Species>/<anything ending in the tree number>.<ext> is a
+ * tree photo. Root-level files are ignored (there should be none; the test
+ * set lives in species folders).
  *
- * Slug assignments are persisted in src/data/slug-lock.json, which MUST be committed.
- * That file is what guarantees a printed QR code keeps opening the same image after
- * new files are added - see the comment on buildManifest for why recomputing slugs
- * from the folder contents is not safe.
+ * slug-lock.json is the legacy file-based scheme, kept frozen: read ONLY to
+ * assert no tree slug collides with a slug it ever issued.
  */
-import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
+import { readFile, readdir, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { EMPTY_LOCK, buildManifest } from '../src/lib/naming.mjs';
+import { isSupported, splitName } from '../src/lib/naming.mjs';
+import { buildTreeManifest, extractPhotoNumber } from '../src/lib/trees.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const imagesDir = join(root, 'public', 'images');
 const manifestFile = join(root, 'src', 'data', 'manifest.json');
-const lockFile = join(root, 'src', 'data', 'slug-lock.json');
 
-async function readImageNames() {
-  try {
-    const dirents = await readdir(imagesDir, { withFileTypes: true });
-    return dirents.filter((d) => d.isFile()).map((d) => d.name);
-  } catch (err) {
-    if (err.code === 'ENOENT') {
-      console.warn(`[manifest] ${imagesDir} does not exist yet - writing an empty manifest.`);
-      return [];
+const trees = JSON.parse(await readFile(join(root, 'src', 'data', 'trees.json'), 'utf8'));
+const lock = JSON.parse(await readFile(join(root, 'src', 'data', 'slug-lock.json'), 'utf8'));
+
+const photosBySpecies = {};
+const ignored = [];
+for (const dirent of await readdir(imagesDir, { withFileTypes: true })) {
+  if (!dirent.isDirectory()) {
+    ignored.push(dirent.name);
+    continue;
+  }
+  const species = dirent.name;
+  for (const file of await readdir(join(imagesDir, species))) {
+    if (!isSupported(file)) continue;
+    const number = extractPhotoNumber(splitName(file).base);
+    if (number === null) {
+      ignored.push(`${species}/${file}`);
+      continue;
     }
-    throw err;
+    (photosBySpecies[species] ??= {})[number] = `${species}/${file}`;
   }
 }
 
-async function readLock() {
-  try {
-    return JSON.parse(await readFile(lockFile, 'utf8'));
-  } catch (err) {
-    if (err.code === 'ENOENT') {
-      console.log('[manifest] No slug lock yet - creating one. Commit it.');
-      return EMPTY_LOCK;
-    }
-    throw err;
-  }
+const { entries, warnings } = buildTreeManifest(trees, photosBySpecies);
+
+const slugSet = new Set(entries.map((e) => e.slug));
+if (slugSet.size !== entries.length) {
+  console.error('[manifest] ABORTING - duplicate tree slugs.');
+  process.exit(1);
 }
-
-const fileNames = await readImageNames();
-const previousLock = await readLock();
-const { entries, warnings, lock } = buildManifest(fileNames, previousLock);
-
-/**
- * Defence in depth. The lock logic should make this impossible, but a printed QR
- * code silently pointing at the wrong poster is the single worst failure this
- * project can produce, so verify rather than trust.
- */
-const changed = Object.entries(previousLock.assignments ?? {})
-  .filter(([file, was]) => {
-    const now = lock.assignments[file] ?? lock.retired[file];
-    return now && now.slug !== was.slug;
-  })
-  .map(([file, was]) => `${file}: "${was.slug}" -> "${(lock.assignments[file] ?? lock.retired[file]).slug}"`);
-
-if (changed.length > 0) {
-  console.error('[manifest] ABORTING - a locked slug changed. Printed QR codes would break:');
-  for (const c of changed) console.error(`  ${c}`);
+const legacySlugs = new Set(
+  [...Object.values(lock.assignments ?? {}), ...Object.values(lock.retired ?? {})].map((r) => r.slug),
+);
+const collisions = entries.filter((e) => legacySlugs.has(e.slug)).map((e) => e.slug);
+if (collisions.length > 0) {
+  console.error(`[manifest] ABORTING - tree slug collides with legacy slug-lock: ${collisions.join(', ')}`);
   process.exit(1);
 }
 
-await mkdir(dirname(manifestFile), { recursive: true });
 await writeFile(manifestFile, `${JSON.stringify(entries, null, 2)}\n`, 'utf8');
-await writeFile(lockFile, `${JSON.stringify(lock, null, 2)}\n`, 'utf8');
 
-const newCount = Object.keys(lock.assignments).length - Object.keys(previousLock.assignments ?? {}).length;
-const retiredCount = Object.keys(lock.retired).length;
-const skipped = fileNames.length - entries.length;
-
-console.log(`[manifest] ${entries.length} image(s) -> src/data/manifest.json`);
-if (newCount > 0) console.log(`[manifest] ${newCount} newly assigned slug(s) - commit src/data/slug-lock.json.`);
-if (retiredCount > 0) console.log(`[manifest] ${retiredCount} retired slug(s) held in reserve.`);
-if (skipped > 0) console.log(`[manifest] skipped ${skipped} unsupported file(s).`);
+const speciesCount = new Set(entries.map((e) => e.species)).size;
+console.log(`[manifest] ${entries.length} tree(s) across ${speciesCount} species -> src/data/manifest.json`);
+console.log(`[manifest] survey has ${trees.length} trees; ${trees.length - entries.length} still waiting for photos.`);
 for (const w of warnings) console.warn(`[manifest] ${w}`);
-if (entries.length === 0) {
-  console.warn('[manifest] No images found. Drop files into public/images/ and re-run.');
-}
+for (const i of ignored) console.warn(`[manifest] ignored (not a species folder / no trailing number): ${i}`);
+if (entries.length === 0) console.warn('[manifest] No tree photos found. Drop files into public/images/<Species>/ and re-run.');

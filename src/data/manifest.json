@@ -1,272 +1,362 @@
 [
   {
-    "file": "Aavla Sample.jpg",
-    "slug": "aavla-sample",
-    "qrName": "Aavla Sample.png",
-    "name": "Aavla Sample"
+    "species": "Aam",
+    "number": 1,
+    "slug": "aam-1",
+    "name": "Aam 1",
+    "file": "Aam/Aam 1.jpg",
+    "qrName": "Aam 1.png"
   },
   {
-    "file": "Agatsya Sample.jpg",
-    "slug": "agatsya-sample",
-    "qrName": "Agatsya Sample.png",
-    "name": "Agatsya Sample"
+    "species": "Aam",
+    "number": 2,
+    "slug": "aam-2",
+    "name": "Aam 2",
+    "file": "Aam/Aam 2.jpg",
+    "qrName": "Aam 2.png"
   },
   {
-    "file": "Amaltas.jpg",
-    "slug": "amaltas",
-    "qrName": "Amaltas.png",
-    "name": "Amaltas"
+    "species": "Aam",
+    "number": 3,
+    "slug": "aam-3",
+    "name": "Aam 3",
+    "file": "Aam/Aam 3.jpg",
+    "qrName": "Aam 3.png"
   },
   {
-    "file": "Amrud.jpg",
-    "slug": "amrud",
-    "qrName": "Amrud.png",
-    "name": "Amrud"
+    "species": "Aam",
+    "number": 4,
+    "slug": "aam-4",
+    "name": "Aam 4",
+    "file": "Aam/Aam 4.jpg",
+    "qrName": "Aam 4.png"
   },
   {
-    "file": "Ashok Sample.jpg",
-    "slug": "ashok-sample",
-    "qrName": "Ashok Sample.png",
-    "name": "Ashok Sample"
+    "species": "Aam",
+    "number": 5,
+    "slug": "aam-5",
+    "name": "Aam 5",
+    "file": "Aam/Aam 5.jpg",
+    "qrName": "Aam 5.png"
   },
   {
-    "file": "Babul.jpg",
-    "slug": "babul",
-    "qrName": "Babul.png",
-    "name": "Babul"
+    "species": "Aam",
+    "number": 6,
+    "slug": "aam-6",
+    "name": "Aam 6",
+    "file": "Aam/Aam 6.jpg",
+    "qrName": "Aam 6.png"
   },
   {
-    "file": "Badam -01.jpg",
-    "slug": "badam-01",
-    "qrName": "Badam -01.png",
-    "name": "Badam -01"
+    "species": "Aam",
+    "number": 7,
+    "slug": "aam-7",
+    "name": "Aam 7",
+    "file": "Aam/Aam 7.jpg",
+    "qrName": "Aam 7.png"
   },
   {
-    "file": "Bael sample.jpg",
-    "slug": "bael-sample",
-    "qrName": "Bael sample.png",
-    "name": "Bael sample"
+    "species": "Aam",
+    "number": 8,
+    "slug": "aam-8",
+    "name": "Aam 8",
+    "file": "Aam/Aam 8.jpg",
+    "qrName": "Aam 8.png"
   },
   {
-    "file": "Bakul-01.jpg",
-    "slug": "bakul-01",
-    "qrName": "Bakul-01.png",
-    "name": "Bakul-01"
+    "species": "Aam",
+    "number": 9,
+    "slug": "aam-9",
+    "name": "Aam 9",
+    "file": "Aam/Aam 9.jpg",
+    "qrName": "Aam 9.png"
   },
   {
-    "file": "Bargad.jpg",
-    "slug": "bargad",
-    "qrName": "Bargad.png",
-    "name": "Bargad"
+    "species": "Aam",
+    "number": 10,
+    "slug": "aam-10",
+    "name": "Aam 10",
+    "file": "Aam/Aam 10.jpg",
+    "qrName": "Aam 10.png"
   },
   {
-    "file": "Ber.jpg",
-    "slug": "ber",
-    "qrName": "Ber.png",
-    "name": "Ber"
+    "species": "Aam",
+    "number": 11,
+    "slug": "aam-11",
+    "name": "Aam 11",
+    "file": "Aam/Aam 11.jpg",
+    "qrName": "Aam 11.png"
   },
   {
-    "file": "Champa.jpg",
-    "slug": "champa",
-    "qrName": "Champa.png",
-    "name": "Champa"
+    "species": "Aam",
+    "number": 12,
+    "slug": "aam-12",
+    "name": "Aam 12",
+    "file": "Aam/Aam 12.jpg",
+    "qrName": "Aam 12.png"
   },
   {
-    "file": "Cheel.jpg",
-    "slug": "cheel",
-    "qrName": "Cheel.png",
-    "name": "Cheel"
+    "species": "Aam",
+    "number": 13,
+    "slug": "aam-13",
+    "name": "Aam 13",
+    "file": "Aam/Aam 13.jpg",
+    "qrName": "Aam 13.png"
   },
   {
-    "file": "Chiku.jpg",
-    "slug": "chiku",
-    "qrName": "Chiku.png",
-    "name": "Chiku"
+    "species": "Aam",
+    "number": 14,
+    "slug": "aam-14",
+    "name": "Aam 14",
+    "file": "Aam/Aam 14.jpg",
+    "qrName": "Aam 14.png"
   },
   {
-    "file": "Christmas.jpg",
-    "slug": "christmas",
-    "qrName": "Christmas.png",
-    "name": "Christmas"
+    "species": "Aam",
+    "number": 15,
+    "slug": "aam-15",
+    "name": "Aam 15",
+    "file": "Aam/Aam 15.jpg",
+    "qrName": "Aam 15.png"
   },
   {
-    "file": "Fishtail plam.jpg",
-    "slug": "fishtail-plam",
-    "qrName": "Fishtail plam.png",
-    "name": "Fishtail plam"
+    "species": "Aavla",
+    "number": 1,
+    "slug": "aavla-1",
+    "name": "Aavla 1",
+    "file": "Aavla/Aavla 1.jpg",
+    "qrName": "Aavla 1.png"
   },
   {
-    "file": "Gular.jpg",
-    "slug": "gular",
-    "qrName": "Gular.png",
-    "name": "Gular"
+    "species": "Aavla",
+    "number": 2,
+    "slug": "aavla-2",
+    "name": "Aavla 2",
+    "file": "Aavla/Aavla 2.jpg",
+    "qrName": "Aavla 2.png"
   },
   {
-    "file": "Gulmohar.jpg",
-    "slug": "gulmohar",
-    "qrName": "Gulmohar.png",
-    "name": "Gulmohar"
+    "species": "Aavla",
+    "number": 3,
+    "slug": "aavla-3",
+    "name": "Aavla 3",
+    "file": "Aavla/Aavla 3.jpg",
+    "qrName": "Aavla 3.png"
   },
   {
-    "file": "Imli.jpg",
-    "slug": "imli",
-    "qrName": "Imli.png",
-    "name": "Imli"
+    "species": "Aavla",
+    "number": 4,
+    "slug": "aavla-4",
+    "name": "Aavla 4",
+    "file": "Aavla/Aavla 4.jpg",
+    "qrName": "Aavla 4.png"
   },
   {
-    "file": "Jamun.jpg",
-    "slug": "jamun",
-    "qrName": "Jamun.png",
-    "name": "Jamun"
+    "species": "Aavla",
+    "number": 5,
+    "slug": "aavla-5",
+    "name": "Aavla 5",
+    "file": "Aavla/Aavla 5.jpg",
+    "qrName": "Aavla 5.png"
   },
   {
-    "file": "Jarul.jpg",
-    "slug": "jarul",
-    "qrName": "Jarul.png",
-    "name": "Jarul"
+    "species": "Aavla",
+    "number": 6,
+    "slug": "aavla-6",
+    "name": "Aavla 6",
+    "file": "Aavla/Aavla 6.jpg",
+    "qrName": "Aavla 6.png"
   },
   {
-    "file": "Kadamb.jpg",
-    "slug": "kadamb",
-    "qrName": "Kadamb.png",
-    "name": "Kadamb"
+    "species": "Aavla",
+    "number": 7,
+    "slug": "aavla-7",
+    "name": "Aavla 7",
+    "file": "Aavla/Aavla 7.jpg",
+    "qrName": "Aavla 7.png"
   },
   {
-    "file": "Khajuri.jpg",
-    "slug": "khajuri",
-    "qrName": "Khajuri.png",
-    "name": "Khajuri"
+    "species": "Aavla",
+    "number": 8,
+    "slug": "aavla-8",
+    "name": "Aavla 8",
+    "file": "Aavla/Aavla 8.jpg",
+    "qrName": "Aavla 8.png"
   },
   {
-    "file": "Khirni.jpg",
-    "slug": "khirni",
-    "qrName": "Khirni.png",
-    "name": "Khirni"
+    "species": "Aavla",
+    "number": 9,
+    "slug": "aavla-9",
+    "name": "Aavla 9",
+    "file": "Aavla/Aavla 9.jpg",
+    "qrName": "Aavla 9.png"
   },
   {
-    "file": "Lasoda.jpg",
-    "slug": "lasoda",
-    "qrName": "Lasoda.png",
-    "name": "Lasoda"
+    "species": "Aavla",
+    "number": 10,
+    "slug": "aavla-10",
+    "name": "Aavla 10",
+    "file": "Aavla/Aavla 10.jpg",
+    "qrName": "Aavla 10.png"
   },
   {
-    "file": "Mahogany.jpg",
-    "slug": "mahogany",
-    "qrName": "Mahogany.png",
-    "name": "Mahogany"
+    "species": "Aavla",
+    "number": 11,
+    "slug": "aavla-11",
+    "name": "Aavla 11",
+    "file": "Aavla/Aavla 11.jpg",
+    "qrName": "Aavla 11.png"
   },
   {
-    "file": "Mango sample.jpg",
-    "slug": "mango-sample",
-    "qrName": "Mango sample.png",
-    "name": "Mango sample"
+    "species": "Aavla",
+    "number": 12,
+    "slug": "aavla-12",
+    "name": "Aavla 12",
+    "file": "Aavla/Aavla 12.jpg",
+    "qrName": "Aavla 12.png"
   },
   {
-    "file": "Nariyal.jpg",
-    "slug": "nariyal",
-    "qrName": "Nariyal.png",
-    "name": "Nariyal"
+    "species": "Aavla",
+    "number": 13,
+    "slug": "aavla-13",
+    "name": "Aavla 13",
+    "file": "Aavla/Aavla 13.jpg",
+    "qrName": "Aavla 13.png"
   },
   {
-    "file": "Neem.jpg",
-    "slug": "neem",
-    "qrName": "Neem.png",
-    "name": "Neem"
+    "species": "Aavla",
+    "number": 14,
+    "slug": "aavla-14",
+    "name": "Aavla 14",
+    "file": "Aavla/Aavla 14.jpg",
+    "qrName": "Aavla 14.png"
   },
   {
-    "file": "Nilgiri.jpg",
-    "slug": "nilgiri",
-    "qrName": "Nilgiri.png",
-    "name": "Nilgiri"
+    "species": "Aavla",
+    "number": 15,
+    "slug": "aavla-15",
+    "name": "Aavla 15",
+    "file": "Aavla/Aavla 15.jpg",
+    "qrName": "Aavla 15.png"
   },
   {
-    "file": "Nimbu.jpg",
-    "slug": "nimbu",
-    "qrName": "Nimbu.png",
-    "name": "Nimbu"
+    "species": "Ashok",
+    "number": 1,
+    "slug": "ashok-1",
+    "name": "Ashok 1",
+    "file": "Ashok/Ashok 1.jpg",
+    "qrName": "Ashok 1.png"
   },
   {
-    "file": "PUKAR.jpg",
-    "slug": "pukar",
-    "qrName": "PUKAR.png",
-    "name": "PUKAR"
+    "species": "Ashok",
+    "number": 2,
+    "slug": "ashok-2",
+    "name": "Ashok 2",
+    "file": "Ashok/Ashok 2.jpg",
+    "qrName": "Ashok 2.png"
   },
   {
-    "file": "PUTRAJIV.jpg",
-    "slug": "putrajiv",
-    "qrName": "PUTRAJIV.png",
-    "name": "PUTRAJIV"
+    "species": "Ashok",
+    "number": 3,
+    "slug": "ashok-3",
+    "name": "Ashok 3",
+    "file": "Ashok/Ashok 3.jpg",
+    "qrName": "Ashok 3.png"
   },
   {
-    "file": "Peepal.jpg",
-    "slug": "peepal",
-    "qrName": "Peepal.png",
-    "name": "Peepal"
+    "species": "Ashok",
+    "number": 4,
+    "slug": "ashok-4",
+    "name": "Ashok 4",
+    "file": "Ashok/Ashok 4.jpg",
+    "qrName": "Ashok 4.png"
   },
   {
-    "file": "Ponytail palm.jpg",
-    "slug": "ponytail-palm",
-    "qrName": "Ponytail palm.png",
-    "name": "Ponytail palm"
+    "species": "Ashok",
+    "number": 5,
+    "slug": "ashok-5",
+    "name": "Ashok 5",
+    "file": "Ashok/Ashok 5.jpg",
+    "qrName": "Ashok 5.png"
   },
   {
-    "file": "Royal palm.jpg",
-    "slug": "royal-palm",
-    "qrName": "Royal palm.png",
-    "name": "Royal palm"
+    "species": "Ashok",
+    "number": 6,
+    "slug": "ashok-6",
+    "name": "Ashok 6",
+    "file": "Ashok/Ashok 6.jpg",
+    "qrName": "Ashok 6.png"
   },
   {
-    "file": "Rubber.jpg",
-    "slug": "rubber",
-    "qrName": "Rubber.png",
-    "name": "Rubber"
+    "species": "Ashok",
+    "number": 7,
+    "slug": "ashok-7",
+    "name": "Ashok 7",
+    "file": "Ashok/Ashok 7.jpg",
+    "qrName": "Ashok 7.png"
   },
   {
-    "file": "Saag.jpg",
-    "slug": "saag",
-    "qrName": "Saag.png",
-    "name": "Saag"
+    "species": "Ashok",
+    "number": 8,
+    "slug": "ashok-8",
+    "name": "Ashok 8",
+    "file": "Ashok/Ashok 8.jpg",
+    "qrName": "Ashok 8.png"
   },
   {
-    "file": "Saal.jpg",
-    "slug": "saal",
-    "qrName": "Saal.png",
-    "name": "Saal"
+    "species": "Ashok",
+    "number": 9,
+    "slug": "ashok-9",
+    "name": "Ashok 9",
+    "file": "Ashok/Ashok 9.jpg",
+    "qrName": "Ashok 9.png"
   },
   {
-    "file": "Saptaparni.jpg",
-    "slug": "saptaparni",
-    "qrName": "Saptaparni.png",
-    "name": "Saptaparni"
+    "species": "Ashok",
+    "number": 10,
+    "slug": "ashok-10",
+    "name": "Ashok 10",
+    "file": "Ashok/Ashok 10.jpg",
+    "qrName": "Ashok 10.png"
   },
   {
-    "file": "Saru.jpg",
-    "slug": "saru",
-    "qrName": "Saru.png",
-    "name": "Saru"
+    "species": "Ashok",
+    "number": 11,
+    "slug": "ashok-11",
+    "name": "Ashok 11",
+    "file": "Ashok/Ashok 11.jpg",
+    "qrName": "Ashok 11.png"
   },
   {
-    "file": "Subabul.jpg",
-    "slug": "subabul",
-    "qrName": "Subabul.png",
-    "name": "Subabul"
+    "species": "Ashok",
+    "number": 12,
+    "slug": "ashok-12",
+    "name": "Ashok 12",
+    "file": "Ashok/Ashok 12.jpg",
+    "qrName": "Ashok 12.png"
   },
   {
-    "file": "Taad.jpg",
-    "slug": "taad",
-    "qrName": "Taad.png",
-    "name": "Taad"
+    "species": "Ashok",
+    "number": 13,
+    "slug": "ashok-13",
+    "name": "Ashok 13",
+    "file": "Ashok/Ashok 13.jpg",
+    "qrName": "Ashok 13.png"
   },
   {
-    "file": "Travellers palm.jpg",
-    "slug": "travellers-palm",
-    "qrName": "Travellers palm.png",
-    "name": "Travellers palm"
+    "species": "Ashok",
+    "number": 14,
+    "slug": "ashok-14",
+    "name": "Ashok 14",
+    "file": "Ashok/Ashok 14.jpg",
+    "qrName": "Ashok 14.png"
   },
   {
-    "file": "Vasantrani.jpg",
-    "slug": "vasantrani",
-    "qrName": "Vasantrani.png",
-    "name": "Vasantrani"
+    "species": "Ashok",
+    "number": 15,
+    "slug": "ashok-15",
+    "name": "Ashok 15",
+    "file": "Ashok/Ashok 15.jpg",
+    "qrName": "Ashok 15.png"
   }
 ]
