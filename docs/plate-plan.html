@@ -242,17 +242,17 @@ qr-codes/                          plates/
 <h2>4. Future phases (after the prototype is approved)</h2>
 
 <div class="card">
-<span class="tag next">Phase 1 — Per-tree data model</span>
+<span class="tag now">Phase 1 — Per-tree data model — DONE</span>
 <p>You drop the tree photos into one agreed folder (species sub-folders, e.g. <code>public/images/Aam/Aam 1.jpg</code>) — the build <b>picks them up from that folder automatically</b> and matches every file to its Excel row. Manifest is built from the Excel + that folder. Viewer becomes per-tree (<code>/view/aam-1</code>). 1,777 static pages — still a fully static site, well within Cloudflare Pages limits. Slug-lock rules unchanged, so a printed QR can never point to the wrong tree. Photos added later are picked up on the next build with no code change.</p>
 </div>
 
 <div class="card">
-<span class="tag next">Phase 2 — Bulk QR generation</span>
+<span class="tag now">Phase 2 — Bulk QR generation — DONE (species-folder bundle ZIPs)</span>
 <p>The existing "Generate QR Codes" panel automatically scales to 1,777 once the manifest is per-tree. The ZIP gains <b>species folders</b> matching the Excel.</p>
 </div>
 
 <div class="card">
-<span class="tag next">Phase 3 — Bulk plate generation</span>
+<span class="tag now">Phase 3 — Bulk plate generation — DONE for Aam (44 species await template artwork)</span>
 <p>45 template images + per-species config (QR box position, number position, fonts). Two ways to generate:</p>
 <ul>
   <li><b>In the portal</b> — download a single plate, or one species' full batch (largest is Ashok: 323 plates — fine in a browser).</li>
@@ -261,7 +261,7 @@ qr-codes/                          plates/
 </div>
 
 <div class="card">
-<span class="tag next">Phase 4 — Verification before printing</span>
+<span class="tag now">Phase 4 — Verification before printing — DONE (npm run verify-print)</span>
 <p>Automated checks, because printed metal cannot be patched:</p>
 <ul>
   <li>Every Excel row has a matching photo file (report every missing/extra photo)</li>
