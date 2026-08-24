@@ -1,5 +1,7 @@
 import { describe, expect, test } from 'vitest';
-import { AAM_PLATE, drawPlate, plateFileName } from './plate.mjs';
+import { PLATE_TEMPLATES, drawPlate, getPlateTemplate, plateFileName } from './plate.mjs';
+
+const AAM_PLATE = PLATE_TEMPLATES?.Aam;
 
 /** Records every canvas call so geometry and layer order can be asserted. */
 function fakeCtx() {
@@ -37,6 +39,13 @@ describe('AAM_PLATE geometry', () => {
     expect(qrBox.x).toBeGreaterThan(AAM_PLATE.width / 2);
     expect(qrBox.x + qrBox.size).toBeLessThan(AAM_PLATE.width);
     expect(qrBox.y + qrBox.size).toBeLessThan(AAM_PLATE.height / 2);
+  });
+});
+
+describe('getPlateTemplate', () => {
+  test('config for a templated species, null otherwise', () => {
+    expect(getPlateTemplate('Aam')).toBe(PLATE_TEMPLATES.Aam);
+    expect(getPlateTemplate('Neem')).toBeNull();
   });
 });
 

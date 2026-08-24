@@ -13,8 +13,7 @@
  */
 
 /**
- * The Aam (आम) prototype plate. One config object per species template will
- * follow the same shape when the other 44 templates arrive.
+ * One config object per delivered species template artwork.
  *
  *   qrBox  - the empty square printed on the template; the QR PNG (which
  *            carries its own white quiet zone) is drawn to fill it exactly.
@@ -25,15 +24,21 @@
  *            the request point is nudged up until the rendered glyph lands on
  *            the sample's band (verified by pixel-measuring a real download).
  */
-export const AAM_PLATE = Object.freeze({
-  species: 'Aam',
-  slug: 'aam',
-  template: '/plates/aam.jpg',
-  width: 1600,
-  height: 1309,
-  qrBox: Object.freeze({ x: 1027, y: 304, size: 229 }),
-  number: Object.freeze({ centerX: 733, centerY: 363, fontSize: 349 }),
+export const PLATE_TEMPLATES = Object.freeze({
+  Aam: Object.freeze({
+    species: 'Aam',
+    template: '/plates/aam.jpg',
+    width: 1600,
+    height: 1309,
+    qrBox: Object.freeze({ x: 1027, y: 304, size: 229 }),
+    number: Object.freeze({ centerX: 733, centerY: 363, fontSize: 349 }),
+  }),
 });
+
+/** Template for a species, or null while its artwork has not been delivered yet. */
+export function getPlateTemplate(species) {
+  return PLATE_TEMPLATES[species] ?? null;
+}
 
 /** "Aam", 1 -> "Aam-1-plate.jpg" — the name the downloaded JPG is saved under. */
 export function plateFileName(species, number) {
