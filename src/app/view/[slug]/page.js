@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import manifest from '@/data/manifest.json';
+import { encodePath } from '@/lib/naming.mjs';
 
 /**
  * The scan target. A customer points a phone camera at a printed QR code and lands here,
@@ -43,8 +44,8 @@ export default async function Page({ params }) {
   const entry = bySlug.get(slug);
   if (!entry) notFound();
 
-  // Filenames contain spaces ("Aavla Sample.jpg"); encode the segment or the image 404s.
-  const src = `/images/${encodeURIComponent(entry.file)}`;
+  // `file` contains a species folder ("Aam/Aam 1.jpg"); encode per segment or the image 404s.
+  const src = `/images/${encodePath(entry.file)}`;
 
   return (
     /*
