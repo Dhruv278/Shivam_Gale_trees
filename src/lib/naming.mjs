@@ -177,3 +177,8 @@ export function buildManifest(fileNames, lock = EMPTY_LOCK) {
 export function viewerUrl(baseUrl, slug) {
   return `${baseUrl.replace(/\/+$/, '')}/view/${slug}`;
 }
+
+/** URL-encode a relative image path one segment at a time, preserving '/'. */
+export function encodePath(path) {
+  return String(path).split('/').map(encodeURIComponent).join('/');
+}

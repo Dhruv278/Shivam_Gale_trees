@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { buildManifest, isSupported, slugify, splitName, viewerUrl } from './naming.mjs';
+import { buildManifest, encodePath, isSupported, slugify, splitName, viewerUrl } from './naming.mjs';
+
+describe('encodePath', () => {
+  it('encodes each segment but keeps folder separators', () => {
+    expect(encodePath('Aam/Aam 1.jpg')).toBe('Aam/Aam%201.jpg');
+    expect(encodePath('Mango sample.jpg')).toBe('Mango%20sample.jpg');
+  });
+});
 
 describe('splitName', () => {
   it('splits basename from extension', () => {
