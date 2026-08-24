@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "manifest": "node scripts/build-manifest.mjs",
+    "import-survey": "node scripts/import-survey.mjs",
     "predev": "node scripts/build-manifest.mjs",
     "dev": "next dev",
     "prebuild": "node scripts/build-manifest.mjs",
@@ -23,6 +24,7 @@
     "@tailwindcss/postcss": "^4",
     "eslint": "^9",
     "eslint-config-next": "16.3.0",
+    "exceljs": "^4.4.0",
     "jsqr": "^1.4.0",
     "pngjs": "^7.0.0",
     "tailwindcss": "^4",
