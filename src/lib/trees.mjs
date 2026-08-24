@@ -25,3 +25,54 @@ export function treeSlug(species, number) {
 export function treeName(species, number) {
   return `${species} ${number}`;
 }
+
+/** "Aam -12" / "Aam 12" / "12" -> 12. Photo filenames only need to END in the tree number. */
+export function extractPhotoNumber(baseName) {
+  const match = /(\d+)\s*$/.exec(String(baseName).trim());
+  return match ? Number(match[1]) : null;
+}
+
+/**
+ * Photos present -> manifest entries, validated against the survey.
+ *
+ * The manifest is photo-driven by design: a tree appears (viewer page, QR,
+ * plate) once its photo lands in public/images/<Species>/. The survey is the
+ * validator - a photo for a tree the Excel does not know is a warning and is
+ * skipped, never silently admitted or renumbered.
+ */
+export function buildTreeManifest(trees, photosBySpecies) {
+  const maxBySpecies = new Map();
+  for (const t of trees) {
+    maxBySpecies.set(t.species, Math.max(maxBySpecies.get(t.species) ?? 0, t.number));
+  }
+
+  const entries = [];
+  const warnings = [];
+  for (const [species, byNumber] of Object.entries(photosBySpecies ?? {})) {
+    const max = maxBySpecies.get(species);
+    if (max === undefined) {
+      warnings.push(
+        `Folder "${species}" is not a species in the survey - skipped ${Object.keys(byNumber).length} photo(s).`,
+      );
+      continue;
+    }
+    for (const [numberKey, file] of Object.entries(byNumber)) {
+      const number = Number(numberKey);
+      if (!Number.isInteger(number) || number < 1 || number > max) {
+        warnings.push(`Photo "${file}": ${species} has trees 1-${max} in the survey, got ${numberKey} - skipped.`);
+        continue;
+      }
+      entries.push({
+        species,
+        number,
+        slug: treeSlug(species, number),
+        name: treeName(species, number),
+        file,
+        qrName: `${treeName(species, number)}.png`,
+      });
+    }
+  }
+
+  entries.sort((a, b) => (a.species < b.species ? -1 : a.species > b.species ? 1 : a.number - b.number));
+  return { entries, warnings };
+}
