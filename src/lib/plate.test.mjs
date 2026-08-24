@@ -18,6 +18,12 @@ function fakeCtx() {
     fillText(...args) {
       calls.push(['fillText', ...args]);
     },
+    // Chrome and @napi-rs/canvas report different baseline metrics for the
+    // same font, so drawPlate must center the ACTUAL glyph box, not trust
+    // textBaseline. The fake returns a lopsided box to prove the math is used.
+    measureText() {
+      return { actualBoundingBoxAscent: 100, actualBoundingBoxDescent: 20 };
+    },
   };
 }
 
@@ -67,15 +73,23 @@ describe('drawPlate', () => {
     expect(draws[1]).toEqual(['drawImage', qrImage, qrBox.x, qrBox.y, qrBox.size, qrBox.size]);
   });
 
-  test('stamps the number centered at the configured spot in the Stencil font', () => {
+  test('centers the measured glyph box on the configured spot, engine-independently', () => {
     const ctx = fakeCtx();
     drawPlate(ctx, { templateImage, qrImage, number: 7, plate: AAM_PLATE });
 
+    // glyph box is ascent 100 above the baseline, descent 20 below (fake):
+    // centering it on centerY puts the baseline at centerY + (100 - 20) / 2.
+    const baselineY = AAM_PLATE.number.centerY + (100 - 20) / 2;
     const fills = ctx.calls.filter(([op]) => op === 'fillText');
-    expect(fills).toEqual([['fillText', '7', AAM_PLATE.number.centerX, AAM_PLATE.number.centerY]]);
+    expect(fills).toEqual([['fillText', '7', AAM_PLATE.number.centerX, baselineY]]);
     expect(ctx.font).toBe(`${AAM_PLATE.number.fontSize}px Stencil, serif`);
     expect(ctx.fillStyle).toBe('#ffffff');
     expect(ctx.textAlign).toBe('center');
-    expect(ctx.textBaseline).toBe('middle');
+    expect(ctx.textBaseline).toBe('alphabetic');
+  });
+
+  test('the configured number center is the true glyph band center from the sample plate', () => {
+    // Sample plate glyph band: y 304..535 -> center 419.5 (measured).
+    expect(AAM_PLATE.number.centerY).toBe(420);
   });
 });

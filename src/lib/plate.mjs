@@ -17,12 +17,10 @@
  *
  *   qrBox  - the empty square printed on the template; the QR PNG (which
  *            carries its own white quiet zone) is drawn to fill it exactly.
- *   number - the digit band sits level with the QR box on the sample plate
- *            (glyph box y 304..535, center x 733). centerY and fontSize are
- *            calibrated, not raw measurements: canvas `textBaseline: 'middle'`
- *            centers the em box, and Stencil's digits hang low in theirs, so
- *            the request point is nudged up until the rendered glyph lands on
- *            the sample's band (verified by pixel-measuring a real download).
+ *   number - the digit band sits level with the QR box on the sample plate:
+ *            glyph box y 304..535 (center 420), center x 733 — all raw pixel
+ *            measurements. fontSize 349 renders the digits at the sample's
+ *            ~231px glyph height (verified by pixel-measuring real output).
  */
 export const PLATE_TEMPLATES = Object.freeze({
   Aam: Object.freeze({
@@ -31,7 +29,7 @@ export const PLATE_TEMPLATES = Object.freeze({
     width: 1600,
     height: 1309,
     qrBox: Object.freeze({ x: 1027, y: 304, size: 229 }),
-    number: Object.freeze({ centerX: 733, centerY: 363, fontSize: 349 }),
+    number: Object.freeze({ centerX: 733, centerY: 420, fontSize: 349 }),
   }),
 });
 
@@ -58,6 +56,14 @@ export function drawPlate(ctx, { templateImage, qrImage, number, plate }) {
   ctx.font = `${plate.number.fontSize}px Stencil, serif`;
   ctx.fillStyle = '#ffffff';
   ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(String(number), plate.number.centerX, plate.number.centerY);
+  // Engines disagree on where 'middle'/'top' baselines sit for the same font
+  // (Chrome vs @napi-rs/canvas differ by ~90px here), so never trust them:
+  // measure the actual glyph box and center IT on the configured point.
+  ctx.textBaseline = 'alphabetic';
+  const text = String(number);
+  const metrics = ctx.measureText(text);
+  const ascent = metrics.actualBoundingBoxAscent ?? 0;
+  const descent = metrics.actualBoundingBoxDescent ?? 0;
+  const baselineY = plate.number.centerY + (ascent - descent) / 2;
+  ctx.fillText(text, plate.number.centerX, baselineY);
 }

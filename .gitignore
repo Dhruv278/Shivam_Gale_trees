@@ -45,6 +45,9 @@ yarn-error.log*
 # Reference photos sent over WhatsApp; the usable copies live in public/plates/.
 /WhatsApp Image *.jpeg
 
+# Production print files written by scripts/generate-print-files.mjs.
+/output/
+
 # vercel
 .vercel
 
