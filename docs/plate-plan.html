@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tree Plate &amp; QR — Project Plan</title>
+<style>
+  :root {
+    --blue: #1526d8;
+    --ink: #1c2333;
+    --muted: #5b6478;
+    --line: #dfe3ec;
+    --bg: #f6f7fb;
+    --card: #ffffff;
+    --accent: #0b8a5c;
+    --warn-bg: #fff7e8;
+    --warn-line: #e8c76e;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 40px 20px 80px;
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    background: var(--bg); color: var(--ink);
+    line-height: 1.55;
+  }
+  main { max-width: 960px; margin: 0 auto; }
+  h1 { font-size: 30px; margin: 0 0 4px; }
+  .subtitle { color: var(--muted); margin-bottom: 36px; }
+  h2 {
+    font-size: 21px; margin: 48px 0 14px;
+    padding-bottom: 8px; border-bottom: 2px solid var(--line);
+  }
+  h2 .step { color: var(--blue); }
+  h3 { font-size: 16px; margin: 22px 0 8px; }
+  p { margin: 8px 0; }
+  .card {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 10px; padding: 18px 22px; margin: 14px 0;
+  }
+  code, .mono {
+    font-family: Consolas, "Cascadia Code", monospace;
+    background: #eef0f6; border-radius: 4px; padding: 1px 6px; font-size: 0.92em;
+  }
+  pre {
+    font-family: Consolas, "Cascadia Code", monospace;
+    background: #101527; color: #d7e0f4; border-radius: 10px;
+    padding: 16px 20px; overflow-x: auto; font-size: 13.5px; line-height: 1.5;
+  }
+  pre .c { color: #7d8bb0; }
+  /* flow diagram */
+  .flow { display: flex; flex-wrap: wrap; align-items: stretch; gap: 0; margin: 18px 0; }
+  .flow .node {
+    background: var(--card); border: 1.5px solid var(--line); border-radius: 10px;
+    padding: 12px 14px; min-width: 150px; max-width: 200px; flex: 1;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .flow .node b { font-size: 14px; display: block; margin-bottom: 3px; }
+  .flow .node span { font-size: 12.5px; color: var(--muted); }
+  .flow .node.hl { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(21,38,216,.08); }
+  .flow .node.new { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(11,138,92,.08); }
+  .flow .arrow {
+    align-self: center; padding: 0 10px; color: var(--muted);
+    font-size: 20px; font-weight: 700; flex: 0 0 auto;
+  }
+  .tag {
+    display: inline-block; font-size: 11.5px; font-weight: 700; letter-spacing: .4px;
+    padding: 2px 9px; border-radius: 999px; text-transform: uppercase; margin-bottom: 8px;
+  }
+  .tag.now  { background: #e6ebff; color: var(--blue); }
+  .tag.next { background: #e2f5ec; color: var(--accent); }
+  .tag.you  { background: #fdeeee; color: #b3261e; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; background: var(--card); font-size: 14px; }
+  th, td { border: 1px solid var(--line); padding: 8px 12px; text-align: left; }
+  th { background: #eef0f6; }
+  .warn {
+    background: var(--warn-bg); border: 1px solid var(--warn-line);
+    border-radius: 10px; padding: 14px 18px; margin: 14px 0;
+  }
+  .warn b:first-child { color: #8a6100; }
+  ul { margin: 8px 0; padding-left: 22px; }
+  li { margin: 5px 0; }
+  .check li { list-style: none; position: relative; padding-left: 26px; }
+  .check li::before {
+    content: "☐"; position: absolute; left: 0; top: 0; font-size: 17px; color: var(--blue);
+  }
+  /* plate mock */
+  .plate-wrap { display: flex; gap: 26px; align-items: center; flex-wrap: wrap; margin: 16px 0; }
+  .plate {
+    width: 300px; height: 244px; background: var(--blue); border-radius: 50%;
+    position: relative; flex: 0 0 auto;
+    box-shadow: 0 4px 14px rgba(21,38,216,.25);
+  }
+  .plate::after {
+    content: ""; position: absolute; inset: 16px; border: 2px solid #fff; border-radius: 50%;
+  }
+  .plate .num {
+    position: absolute; left: 33%; top: 24%; transform: translateX(-50%);
+    color: #fff; font-size: 52px; font-weight: 700; font-family: Georgia, serif; z-index: 2;
+  }
+  .plate .qr {
+    position: absolute; right: 21%; top: 21%; width: 62px; height: 62px;
+    background: #fff; z-index: 2;
+    background-image:
+      linear-gradient(90deg, #000 2px, transparent 2px),
+      linear-gradient(#000 2px, transparent 2px);
+    background-size: 8px 8px; background-position: 4px 4px;
+    background-clip: content-box; padding: 5px;
+  }
+  .plate .divider {
+    position: absolute; left: 14%; right: 14%; top: 51%; height: 2px; background: #fff; z-index: 2;
+  }
+  .plate .divider::before, .plate .divider::after {
+    content: "❧"; color: #fff; position: absolute; top: -11px; font-size: 18px;
+  }
+  .plate .divider::before { left: -4px; transform: scaleX(-1); }
+  .plate .divider::after { right: -4px; }
+  .plate .name {
+    position: absolute; left: 50%; top: 66%; transform: translateX(-50%);
+    color: #fff; font-size: 46px; font-weight: 700; z-index: 2;
+  }
+  .legend { font-size: 13.5px; color: var(--muted); }
+  .legend b { color: var(--ink); }
+  .pill-row { display: flex; gap: 10px; flex-wrap: wrap; margin: 10px 0; }
+  .pill-row .pill {
+    background: var(--card); border: 1px solid var(--line); border-radius: 8px;
+    padding: 8px 14px; font-size: 13.5px;
+  }
+</style>
+</head>
+<body>
+<main>
+
+<h1>Tree Plate &amp; QR Generator — Project Plan</h1>
+<p class="subtitle">GAIL (India) Ltd · Hazira Compressor Station · Tree Survey 2026-27 — scaling from 45 species QRs to 1,777 per-tree plates &amp; QRs</p>
+
+<!-- ============================================================ -->
+<h2>1. How the project works today (the existing 45-image flow)</h2>
+
+<div class="card">
+<p>Today the site knows only <b>45 species poster images</b>. Every file in <code>public/images/</code> automatically becomes one QR code and one viewer page:</p>
+
+<div class="flow">
+  <div class="node"><b>public/images/</b><span>45 poster JPGs<br>e.g. <code>Amaltas.jpg</code></span></div>
+  <div class="arrow">→</div>
+  <div class="node"><b>build-manifest</b><span>runs on every build; assigns a permanent slug</span></div>
+  <div class="arrow">→</div>
+  <div class="node"><b>slug-lock.json</b><span><code>amaltas</code> is locked forever — printed QRs never break</span></div>
+  <div class="arrow">→</div>
+  <div class="node"><b>Portal <code>/</code></b><span>lists all 45, generates <code>qr-codes.zip</code></span></div>
+  <div class="arrow">→</div>
+  <div class="node"><b>Viewer</b><span><code>/view/amaltas</code> full-screen poster</span></div>
+</div>
+
+<h3>Concrete sample (real values from the repo)</h3>
+<pre>
+1. File           public/images/Amaltas.jpg
+2. Slug           amaltas                        <span class="c">← locked in src/data/slug-lock.json</span>
+3. QR encodes     https://&lt;your-domain&gt;/view/amaltas
+4. ZIP entry      Amaltas.png                    <span class="c">← inside qr-codes.zip</span>
+5. Scan result    phone opens /view/amaltas → full-screen Amaltas poster
+</pre>
+<p class="legend">One QR <b>per species</b> — all Amaltas trees would share the same code. This is what we are replacing.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2>2. What changes: replace the 45 species entries with 1,777 trees</h2>
+
+<div class="card">
+<p>The Excel (<code>Revised Tree survey 2026-27.xlsx</code>) becomes the <b>single source of truth</b>. It lists <b>1,777 trees</b> across 45 species in 10 blocks. Each tree gets its <b>own</b> photo, its own viewer page, its own QR, and its own plate:</p>
+
+<div class="flow">
+  <div class="node new"><b>Excel sheet</b><span>1,777 rows<br>Aam-1 … Ashok-323</span></div>
+  <div class="arrow">→</div>
+  <div class="node new"><b>1,700+ photos</b><span>you provide, named to match: <code>Aam 1.jpg</code>, <code>Aam 2.jpg</code>…</span></div>
+  <div class="arrow">→</div>
+  <div class="node"><b>build-manifest</b><span>now reads the Excel, one entry per <b>tree</b></span></div>
+  <div class="arrow">→</div>
+  <div class="node"><b>slug-lock.json</b><span>1,777 locked slugs<br><code>aam-1</code>, <code>ashok-57</code>…</span></div>
+  <div class="arrow">→</div>
+  <div class="node new"><b>QRs + Plates</b><span>1,777 of each, in species folders</span></div>
+  <div class="arrow">→</div>
+  <div class="node"><b>Viewer</b><span><code>/view/aam-1</code> opens tree Aam-1's own photo</span></div>
+</div>
+
+<h3>Sample flow after the change</h3>
+<pre>
+Excel row         Block 01 · Aam -1 · Mangifera indica · Main gate
+Photo             photos/Aam/Aam 1.jpg               <span class="c">← you provide</span>
+Slug              aam-1                              <span class="c">← locked forever</span>
+QR encodes        https://&lt;final-domain&gt;/view/aam-1
+Plate JPG         plates/Aam/Aam-1.jpg               <span class="c">← number "1" + आम template + QR</span>
+Scan result       phone opens /view/aam-1 → photo of that exact tree
+</pre>
+
+<h3>Output folders follow the Excel (your requirement)</h3>
+<pre>
+qr-codes/                          plates/
+├─ Aam/                            ├─ Aam/
+│  ├─ Aam-1.png                    │  ├─ Aam-1.jpg
+│  ├─ Aam-2.png … Aam-93.png       │  ├─ Aam-2.jpg … Aam-93.jpg
+├─ Ashok/                          ├─ Ashok/
+│  ├─ Ashok-1.png … Ashok-323.png  │  ├─ Ashok-1.jpg … Ashok-323.jpg
+├─ Neem/  …45 species folders      ├─ Neem/  …45 species folders
+</pre>
+<p class="legend">Folder names and tree numbers come straight from the Excel — no guessing. (Block info is also in the Excel, so per-block folders are possible instead, if you prefer.)</p>
+</div>
+
+<!-- ============================================================ -->
+<h2>3. <span class="step">Task 1 (build now):</span> the plate prototype page</h2>
+
+<div class="card">
+<span class="tag now">Building first</span>
+<p>A new page <code>/plate</code> in the existing portal that produces one plate, exactly like your sample:</p>
+
+<div class="plate-wrap">
+  <div class="plate">
+    <div class="num">1</div>
+    <div class="qr"></div>
+    <div class="divider"></div>
+    <div class="name">आम</div>
+  </div>
+  <div class="legend">
+    <p><b>How it renders</b> — one HTML5 <code>&lt;canvas&gt;</code>, same pixels on screen and in the download:</p>
+    <ol>
+      <li>Draw your blank template image (blue plate with <b>आम</b> already on it)</li>
+      <li>Generate the QR with the same library the portal already uses</li>
+      <li>Draw the QR exactly inside the empty square of the template</li>
+      <li>Draw the number — static <b>"1"</b> for now, dynamic later</li>
+    </ol>
+    <p><b>Download Plate</b> button → converts canvas to <b>JPG</b> → downloads <code>Aam-1-plate.jpg</code></p>
+  </div>
+</div>
+
+<ul>
+  <li>QR / number positions are stored in a small config — easy to adjust when the final template files and fonts arrive.</li>
+  <li>Placeholder fonts for now; swapped for your real number + Hindi fonts when you send them.</li>
+  <li>The prototype uses the WhatsApp template image; the production run needs clean high-resolution templates (see checklist).</li>
+</ul>
+</div>
+
+<!-- ============================================================ -->
+<h2>4. Future phases (after the prototype is approved)</h2>
+
+<div class="card">
+<span class="tag next">Phase 1 — Per-tree data model</span>
+<p>You drop the tree photos into one agreed folder (species sub-folders, e.g. <code>public/images/Aam/Aam 1.jpg</code>) — the build <b>picks them up from that folder automatically</b> and matches every file to its Excel row. Manifest is built from the Excel + that folder. Viewer becomes per-tree (<code>/view/aam-1</code>). 1,777 static pages — still a fully static site, well within Cloudflare Pages limits. Slug-lock rules unchanged, so a printed QR can never point to the wrong tree. Photos added later are picked up on the next build with no code change.</p>
+</div>
+
+<div class="card">
+<span class="tag next">Phase 2 — Bulk QR generation</span>
+<p>The existing "Generate QR Codes" panel automatically scales to 1,777 once the manifest is per-tree. The ZIP gains <b>species folders</b> matching the Excel.</p>
+</div>
+
+<div class="card">
+<span class="tag next">Phase 3 — Bulk plate generation</span>
+<p>45 template images + per-species config (QR box position, number position, fonts). Two ways to generate:</p>
+<ul>
+  <li><b>In the portal</b> — download a single plate, or one species' full batch (largest is Ashok: 323 plates — fine in a browser).</li>
+  <li><b>Production script</b> — one command generates all 1,777 plate JPGs to disk in species folders. More reliable than holding a ~500&nbsp;MB ZIP in browser memory. This is what you run for the final print files.</li>
+</ul>
+</div>
+
+<div class="card">
+<span class="tag next">Phase 4 — Verification before printing</span>
+<p>Automated checks, because printed metal cannot be patched:</p>
+<ul>
+  <li>Every Excel row has a matching photo file (report every missing/extra photo)</li>
+  <li>Every generated QR is decoded back and must equal its exact viewer URL (test already exists for the 45; it scales up)</li>
+  <li>Every plate JPG exists, correct count per species folder</li>
+</ul>
+</div>
+
+<!-- ============================================================ -->
+<h2>5. What we need from you (nothing prints without these)</h2>
+
+<div class="card">
+<span class="tag you">Your inputs</span>
+<ul class="check">
+  <li><b>Final Excel</b> — the tree list is the ID source (species + number)</li>
+  <li><b>1,700+ tree photos</b>, named/foldered to match the Excel (<code>Aam 1.jpg</code>, <code>Aam 2.jpg</code>…)</li>
+  <li><b>45 clean high-resolution template plates</b> from the designer (one per species, Hindi name baked in) — not WhatsApp copies, WhatsApp compresses images and print will show it</li>
+  <li><b>Fonts</b> — the number font (and Hindi font if anything textual is stamped by code)</li>
+  <li><b>Plate physical size</b> (cm) so the JPG resolution matches print quality</li>
+  <li><b>Final domain locked</b> — every QR embeds the site URL permanently; changing the domain after printing invalidates all 1,777 plates</li>
+</ul>
+</div>
+
+<!-- ============================================================ -->
+<h2>6. Known issues to fix along the way</h2>
+
+<div class="warn">
+<b>Name mismatches:</b> the Excel species names and current image file names differ in a few places. When we switch to per-tree, an explicit mapping table resolves these — please keep the new photo folders spelled like the Excel.
+</div>
+
+<table>
+  <tr><th>Excel says</th><th>Image file says</th></tr>
+  <tr><td>Aam</td><td>Mango sample.jpg</td></tr>
+  <tr><td>Lasora</td><td>Lasoda.jpg</td></tr>
+  <tr><td>Gulmohur</td><td>Gulmohar.jpg</td></tr>
+  <tr><td>Khajur</td><td>Khajuri.jpg</td></tr>
+  <tr><td>Mahogani</td><td>Mahogany.jpg</td></tr>
+  <tr><td>Fishtail Palm</td><td>Fishtail plam.jpg (typo)</td></tr>
+  <tr><td>Agastya</td><td>Agatsya Sample.jpg</td></tr>
+</table>
+
+<div class="pill-row">
+  <div class="pill"><b>Total trees:</b> 1,777</div>
+  <div class="pill"><b>Species:</b> 45</div>
+  <div class="pill"><b>Blocks:</b> 10</div>
+  <div class="pill"><b>Largest species:</b> Ashok (323)</div>
+  <div class="pill"><b>Smallest:</b> 7 species with 1 tree</div>
+</div>
+
+</main>
+</body>
+</html>

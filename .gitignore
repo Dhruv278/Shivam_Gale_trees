@@ -42,6 +42,9 @@ yarn-error.log*
 # the archive too would store every image twice.
 /drive-download-*.zip
 
+# Reference photos sent over WhatsApp; the usable copies live in public/plates/.
+/WhatsApp Image *.jpeg
+
 # vercel
 .vercel
 
