@@ -2,7 +2,7 @@
 
 import { useSyncExternalStore } from 'react';
 import BaseUrlBanner from '@/components/BaseUrlBanner';
-import GeneratePanel from '@/components/GeneratePanel';
+import BundlePanel from '@/components/BundlePanel';
 import ImageList from '@/components/ImageList';
 import { resolveBaseUrl } from '@/lib/qr.mjs';
 
@@ -45,7 +45,7 @@ export default function Portal({ entries }) {
         envConfigured={envConfigured}
         exampleSlug={entries[0]?.slug}
       />
-      <GeneratePanel entries={entries} baseUrl={baseUrl} />
+      <BundlePanel entries={entries} baseUrl={baseUrl} />
       <ImageList entries={entries} baseUrl={baseUrl} />
     </div>
   );

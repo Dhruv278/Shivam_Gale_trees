@@ -1,14 +1,16 @@
+import manifest from '@/data/manifest.json';
 import PlateStudio from '@/components/PlateStudio';
+import { PLATE_TEMPLATES } from '@/lib/plate.mjs';
 
 export const metadata = {
   title: 'Plate Generator',
-  description: 'Compose and download a printable tree plate with its QR code.',
+  description: 'Compose and download printable tree plates with QR codes.',
 };
 
 /**
- * Prototype plate generator (Task 1 of the plate roadmap — see
- * docs/plate-plan.html). One species (Aam/आम), one static tree number; the
- * per-tree dynamic version arrives with the Excel-driven manifest in Phase 1.
+ * Plate generator over the photographed trees (see docs/plate-plan.html).
+ * Server component hands the manifest to the client shell, matching how the
+ * portal page works.
  */
 export default function PlatePage() {
   return (
@@ -19,13 +21,13 @@ export default function PlatePage() {
             Plate Generator
           </h1>
           <p className="font-mono text-xs text-zinc-500 dark:text-zinc-400">
-            prototype · Aam (आम) · tree 1
+            {manifest.length} trees · templates ready: {Object.keys(PLATE_TEMPLATES).join(', ')}
           </p>
         </div>
       </header>
 
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8 sm:px-6 sm:py-10">
-        <PlateStudio />
+        <PlateStudio entries={manifest} />
       </main>
     </div>
   );

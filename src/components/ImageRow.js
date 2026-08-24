@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Button from '@/components/Button';
+import { encodePath } from '@/lib/naming.mjs';
 import { downloadDataUrl, generateQrDataUrl } from '@/lib/qr.mjs';
 
 const COPIED_MS = 1400;
@@ -48,7 +49,7 @@ export default function ImageRow({ entry, baseUrl, url }) {
       */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={`/images/${encodeURIComponent(entry.file)}`}
+        src={`/images/${encodePath(entry.file)}`}
         alt=""
         loading="lazy"
         decoding="async"
@@ -59,7 +60,7 @@ export default function ImageRow({ entry, baseUrl, url }) {
 
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium text-zinc-900 dark:text-zinc-100">
-          {entry.file}
+          {entry.name}
         </p>
         <p className="mt-0.5 flex flex-wrap items-baseline gap-x-2 font-mono text-xs text-zinc-500 dark:text-zinc-400">
           <span className="text-zinc-600 dark:text-zinc-300">{entry.slug}</span>
@@ -74,7 +75,7 @@ export default function ImageRow({ entry, baseUrl, url }) {
         {failed && (
           <span className="text-xs font-medium text-red-600 dark:text-red-400">failed</span>
         )}
-        <Button size="sm" variant="ghost" onClick={handleCopy} aria-label={`Copy URL for ${entry.file}`}>
+        <Button size="sm" variant="ghost" onClick={handleCopy} aria-label={`Copy URL for ${entry.name}`}>
           {copied ? 'Copied' : 'Copy URL'}
         </Button>
         <a
@@ -90,7 +91,7 @@ export default function ImageRow({ entry, baseUrl, url }) {
           variant="secondary"
           onClick={handleDownload}
           disabled={busy || !baseUrl}
-          aria-label={`Download QR code for ${entry.file}`}
+          aria-label={`Download QR code for ${entry.name}`}
         >
           {busy ? '…' : 'Download QR'}
         </Button>

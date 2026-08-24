@@ -18,7 +18,7 @@ export default function Home() {
             QR Manager
           </h1>
           <p className="font-mono text-xs text-zinc-500 dark:text-zinc-400">
-            src/data/manifest.json · {manifest.length} entries
+            src/data/manifest.json · {manifest.length} trees
           </p>
         </div>
       </header>
