@@ -22,8 +22,8 @@ the drop folder. No backend, no database, no API tokens — the whole site is st
    - A photo for a tree the Excel does not know is skipped with a warning — fix the name, never
      force it.
 
-   > The 45 photos currently in the repo are **test stand-ins** (the old species posters split
-   > into `Aam/`, `Aavla/`, `Ashok/`). Delete them when the real ~1,700 photos arrive.
+   > The real survey photos are in place: all **1,777 trees across 45 species**, verified 1:1
+   > against the Excel by `npm run verify-print` and `scripts/audit-print-run.mjs`.
 
 2. **Refresh the manifest** (also runs automatically before `dev` and `build`):
 

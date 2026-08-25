@@ -3,7 +3,13 @@ import { PLATE_TEMPLATES, drawPlate, getPlateTemplate, plateFileName } from './p
 
 const AAM_PLATE = PLATE_TEMPLATES?.Aam;
 
-/** Records every canvas call so geometry and layer order can be asserted. */
+/**
+ * Records every canvas call so geometry and layer order can be asserted.
+ *
+ * measureText scales with the currently-set font size (parsed from ctx.font):
+ * Chrome and @napi-rs/canvas report different real metrics, so drawPlate must
+ * derive positions from measurements, never from engine baseline behavior.
+ */
 function fakeCtx() {
   const calls = [];
   return {
@@ -18,11 +24,13 @@ function fakeCtx() {
     fillText(...args) {
       calls.push(['fillText', ...args]);
     },
-    // Chrome and @napi-rs/canvas report different baseline metrics for the
-    // same font, so drawPlate must center the ACTUAL glyph box, not trust
-    // textBaseline. The fake returns a lopsided box to prove the math is used.
-    measureText() {
-      return { actualBoundingBoxAscent: 100, actualBoundingBoxDescent: 20 };
+    measureText(text) {
+      const size = Number(/^(\d+)px/.exec(this.font)?.[1] ?? 0);
+      return {
+        width: size * text.length * 0.6,
+        actualBoundingBoxAscent: size * 0.5,
+        actualBoundingBoxDescent: size * 0.1,
+      };
     },
   };
 }
@@ -37,21 +45,38 @@ describe('plateFileName', () => {
   });
 });
 
-describe('AAM_PLATE geometry', () => {
-  test('matches the measured template: 1600x1309 with the QR box inside the plate', () => {
-    expect(AAM_PLATE.width).toBe(1600);
-    expect(AAM_PLATE.height).toBe(1309);
-    const { qrBox } = AAM_PLATE;
-    expect(qrBox.x).toBeGreaterThan(AAM_PLATE.width / 2);
-    expect(qrBox.x + qrBox.size).toBeLessThan(AAM_PLATE.width);
-    expect(qrBox.y + qrBox.size).toBeLessThan(AAM_PLATE.height / 2);
+describe('PLATE_TEMPLATES registry', () => {
+  test('covers all 45 survey species', () => {
+    expect(Object.keys(PLATE_TEMPLATES)).toHaveLength(45);
+    for (const s of ['Aam', 'Ashok', 'Gulmohur', 'Khajur', 'Lasora', 'Mahogani', 'Royal Palm']) {
+      expect(PLATE_TEMPLATES[s]).toBeDefined();
+    }
+  });
+
+  test('every template shares the measured 1651x1351 layout with the QR box inside the plate', () => {
+    for (const plate of Object.values(PLATE_TEMPLATES)) {
+      expect(plate.width).toBe(1651);
+      expect(plate.height).toBe(1351);
+      expect(plate.qrBox).toEqual({ x: 1058, y: 314, size: 237 });
+      expect(plate.number.centerX).toBe(756);
+      expect(plate.number.centerY).toBe(433);
+      // the number band must end before the QR box begins
+      expect(plate.number.centerX + plate.number.maxWidth / 2).toBeLessThan(plate.qrBox.x);
+    }
+  });
+
+  test('template paths are slugified species files', () => {
+    expect(PLATE_TEMPLATES.Aam.template).toBe('/plates/aam.jpg');
+    expect(PLATE_TEMPLATES['Royal Palm'].template).toBe('/plates/royal-palm.jpg');
+    expect(PLATE_TEMPLATES['Ponytail palm'].template).toBe('/plates/ponytail-palm.jpg');
   });
 });
 
 describe('getPlateTemplate', () => {
-  test('config for a templated species, null otherwise', () => {
+  test('config for every survey species, null for unknown names', () => {
     expect(getPlateTemplate('Aam')).toBe(PLATE_TEMPLATES.Aam);
-    expect(getPlateTemplate('Neem')).toBeNull();
+    expect(getPlateTemplate('Neem')).toBe(PLATE_TEMPLATES.Neem);
+    expect(getPlateTemplate('Ghost')).toBeNull();
   });
 });
 
@@ -77,19 +102,30 @@ describe('drawPlate', () => {
     const ctx = fakeCtx();
     drawPlate(ctx, { templateImage, qrImage, number: 7, plate: AAM_PLATE });
 
-    // glyph box is ascent 100 above the baseline, descent 20 below (fake):
-    // centering it on centerY puts the baseline at centerY + (100 - 20) / 2.
-    const baselineY = AAM_PLATE.number.centerY + (100 - 20) / 2;
+    // fake metrics at 361px: ascent 180.5, descent 36.1 ->
+    // baseline = 433 + (180.5 - 36.1) / 2 = 505.2
     const fills = ctx.calls.filter(([op]) => op === 'fillText');
-    expect(fills).toEqual([['fillText', '7', AAM_PLATE.number.centerX, baselineY]]);
+    expect(fills).toHaveLength(1);
+    expect(fills[0][1]).toBe('7');
+    expect(fills[0][2]).toBe(AAM_PLATE.number.centerX);
+    expect(fills[0][3]).toBeCloseTo(505.2, 5);
     expect(ctx.font).toBe(`${AAM_PLATE.number.fontSize}px Stencil, serif`);
     expect(ctx.fillStyle).toBe('#ffffff');
     expect(ctx.textAlign).toBe('center');
     expect(ctx.textBaseline).toBe('alphabetic');
   });
 
-  test('the configured number center is the true glyph band center from the sample plate', () => {
-    // Sample plate glyph band: y 304..535 -> center 419.5 (measured).
-    expect(AAM_PLATE.number.centerY).toBe(420);
+  test('a 3-digit number shrinks to fit the band and stays centered', () => {
+    const ctx = fakeCtx();
+    drawPlate(ctx, { templateImage, qrImage, number: 323, plate: AAM_PLATE });
+
+    // fake width at 361px = 361 * 3 * 0.6 = 649.8 > maxWidth 560 ->
+    // fontSize floor(361 * 560 / 649.8) = 311; then ascent 155.5, descent 31.1
+    // -> baseline = 433 + (155.5 - 31.1) / 2 = 495.2
+    const fills = ctx.calls.filter(([op]) => op === 'fillText');
+    expect(ctx.font).toBe('311px Stencil, serif');
+    expect(fills[0][1]).toBe('323');
+    expect(fills[0][2]).toBe(AAM_PLATE.number.centerX);
+    expect(fills[0][3]).toBeCloseTo(495.2, 5);
   });
 });

@@ -7,38 +7,58 @@
  * canvas context so the geometry and layer order are unit-testable without a
  * DOM, in the same spirit as qr.mjs.
  *
- * All coordinates are pixels of the template at its natural size and were
- * measured from the artwork (see docs/plate-plan.html). The physical plate is
- * 5.5in x 4.5in, which the 1600x1309 template matches at ~291 DPI.
- */
-
-/**
- * One config object per delivered species template artwork.
+ * All 45 delivered templates are the same artwork at 1651x1351 px (5.5in x
+ * 4.5in at ~300 DPI) with the QR placeholder square at an identical position
+ * (measured across every file; the ±1px spread is JPEG noise), so one shared
+ * layout drives every species.
  *
  *   qrBox  - the empty square printed on the template; the QR PNG (which
  *            carries its own white quiet zone) is drawn to fill it exactly.
- *   number - the digit band sits level with the QR box on the sample plate:
- *            glyph box y 304..535 (center 420), center x 733 — all raw pixel
- *            measurements. fontSize 349 renders the digits at the sample's
- *            ~231px glyph height (verified by pixel-measuring real output).
+ *   number - the digit band sits level with the QR box. centerX/centerY are
+ *            the sample plate's measured glyph center scaled to the new
+ *            template resolution; fontSize renders single digits at the
+ *            sample's glyph height; maxWidth caps multi-digit numbers so they
+ *            can never run into the QR box (drawPlate shrinks to fit).
  */
-export const PLATE_TEMPLATES = Object.freeze({
-  Aam: Object.freeze({
-    species: 'Aam',
-    template: '/plates/aam.jpg',
-    width: 1600,
-    height: 1309,
-    qrBox: Object.freeze({ x: 1027, y: 304, size: 229 }),
-    number: Object.freeze({ centerX: 733, centerY: 420, fontSize: 349 }),
-  }),
-});
+import { slugify } from './naming.mjs';
 
-/** Template for a species, or null while its artwork has not been delivered yet. */
+/** Every species in the survey, Excel spelling. Template files are /plates/<slug>.jpg. */
+const SPECIES = [
+  'Aam', 'Aavla', 'Agastya', 'Amaltas', 'Amrud', 'Ashok', 'Babul', 'Badam', 'Bael',
+  'Bakul', 'Bargad', 'Ber', 'Champa', 'Cheel', 'Chiku', 'Christmas', 'Fishtail Palm',
+  'Gular', 'Gulmohur', 'Imli', 'Jamun', 'Jarul', 'Kadamb', 'Khajur', 'Khirni',
+  'Lasora', 'Mahogani', 'Nariyal', 'Neem', 'Nilgiri', 'Nimbu', 'Peepal',
+  'Ponytail palm', 'Pukar', 'Putrajiv', 'Royal Palm', 'Rubber', 'Saag', 'Saal',
+  'Saptaparni', 'Saru', 'Subabul', 'Taad', 'Travellers palm', 'Vasantrani',
+];
+
+const WIDTH = 1651;
+const HEIGHT = 1351;
+const QR_BOX = Object.freeze({ x: 1058, y: 314, size: 237 });
+const NUMBER = Object.freeze({ centerX: 756, centerY: 433, fontSize: 361, maxWidth: 560 });
+
+export const PLATE_TEMPLATES = Object.freeze(
+  Object.fromEntries(
+    SPECIES.map((species) => [
+      species,
+      Object.freeze({
+        species,
+        template: `/plates/${slugify(species)}.jpg`,
+        width: WIDTH,
+        height: HEIGHT,
+        qrBox: QR_BOX,
+        number: NUMBER,
+      }),
+    ]),
+  ),
+);
+
+/** Template for a species, or null for names outside the survey. */
 export function getPlateTemplate(species) {
   return PLATE_TEMPLATES[species] ?? null;
 }
 
-/** "Aam", 1 -> "Aam-1-plate.jpg" — the name the downloaded JPG is saved under. */
+/** "Aam", 1 -> "Aam-1-plate.jpg" — the name a single downloaded plate is saved under. */
 export function plateFileName(species, number) {
   return `${species}-${number}-plate.jpg`;
 }
@@ -53,15 +73,26 @@ export function drawPlate(ctx, { templateImage, qrImage, number, plate }) {
   const { qrBox } = plate;
   ctx.drawImage(qrImage, qrBox.x, qrBox.y, qrBox.size, qrBox.size);
 
-  ctx.font = `${plate.number.fontSize}px Stencil, serif`;
   ctx.fillStyle = '#ffffff';
   ctx.textAlign = 'center';
   // Engines disagree on where 'middle'/'top' baselines sit for the same font
   // (Chrome vs @napi-rs/canvas differ by ~90px here), so never trust them:
   // measure the actual glyph box and center IT on the configured point.
   ctx.textBaseline = 'alphabetic';
+
   const text = String(number);
-  const metrics = ctx.measureText(text);
+  let fontSize = plate.number.fontSize;
+  ctx.font = `${fontSize}px Stencil, serif`;
+  let metrics = ctx.measureText(text);
+
+  // Multi-digit numbers must never run into the QR box: shrink to the band.
+  const { maxWidth } = plate.number;
+  if (maxWidth && metrics.width > maxWidth) {
+    fontSize = Math.floor((fontSize * maxWidth) / metrics.width);
+    ctx.font = `${fontSize}px Stencil, serif`;
+    metrics = ctx.measureText(text);
+  }
+
   const ascent = metrics.actualBoundingBoxAscent ?? 0;
   const descent = metrics.actualBoundingBoxDescent ?? 0;
   const baselineY = plate.number.centerY + (ascent - descent) / 2;
