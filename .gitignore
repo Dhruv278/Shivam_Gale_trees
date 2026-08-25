@@ -42,6 +42,11 @@ yarn-error.log*
 # the archive too would store every image twice.
 /drive-download-*.zip
 
+# Raw deliveries of the real data (2026-08-25). Photos live in public/images/,
+# templates in public/plates/ — keeping the sources too would double the repo.
+/wetransfer_output_*/
+/Tree name plate without numbers/
+
 # Reference photos sent over WhatsApp; the usable copies live in public/plates/.
 /WhatsApp Image *.jpeg
 
