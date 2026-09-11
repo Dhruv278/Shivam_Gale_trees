@@ -9,6 +9,7 @@ describe('bundlePaths', () => {
       image: 'Aam/images/Aam 1.jpg',
       qr: 'Aam/qr/Aam 1.png',
       qrSvg: 'Aam/qr/Aam 1.svg',
+      qrDxf: 'Aam/qr/Aam 1.dxf',
       plate: 'Aam/plates/Aam 1.jpg',
     });
   });
@@ -17,10 +18,11 @@ describe('bundlePaths', () => {
     expect(bundlePaths(entry, false).plate).toBeNull();
   });
 
-  // Both QR formats are the same code for the same tree, so they must sit in the
+  // All QR formats are the same code for the same tree, so they must sit in the
   // same folder under the same basename and differ only in extension.
-  test('the two QR formats are siblings differing only in extension', () => {
-    const { qr, qrSvg } = bundlePaths(entry, true);
+  test('the QR formats are siblings differing only in extension', () => {
+    const { qr, qrSvg, qrDxf } = bundlePaths(entry, true);
     expect(qrSvg).toBe(qr.replace(/\.png$/, '.svg'));
+    expect(qrDxf).toBe(qr.replace(/\.png$/, '.dxf'));
   });
 });

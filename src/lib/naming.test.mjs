@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   buildManifest,
+  dxfQrName,
   encodePath,
   isSupported,
   slugify,
@@ -232,5 +233,17 @@ describe('svgQrName', () => {
 
   it('only replaces the final extension on names containing dots', () => {
     expect(svgQrName('Badam -01.v2.png')).toBe('Badam -01.v2.svg');
+  });
+});
+
+describe('dxfQrName', () => {
+  it('swaps the locked .png name for .dxf, leaving the basename verbatim', () => {
+    expect(dxfQrName('Aam 72.png')).toBe('Aam 72.dxf');
+    expect(dxfQrName('Front-2.png')).toBe('Front-2.dxf');
+    expect(dxfQrName('Badam -01.v2.png')).toBe('Badam -01.v2.dxf');
+  });
+
+  it('names all three formats after the same locked basename', () => {
+    expect(splitName(dxfQrName('Aavla 1.png')).base).toBe(splitName(svgQrName('Aavla 1.png')).base);
   });
 });

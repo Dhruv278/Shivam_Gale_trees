@@ -3,6 +3,7 @@
  *   <Species>/images/<Name>.<ext>  - the original photo bytes
  *   <Species>/qr/<Name>.png        - the QR PNG
  *   <Species>/qr/<Name>.svg        - the same QR as vector, for the printer
+ *   <Species>/qr/<Name>.dxf        - the same QR as CAD geometry, for the laser shop
  *   <Species>/plates/<Name>.jpg    - the composed plate
  * Same base name in all three folders so any file identifies its tree at a
  * glance. Browser ZIPs and the production disk output both use this.
@@ -15,6 +16,7 @@ export function bundlePaths(entry, hasTemplate) {
     image: `${entry.species}/images/${entry.name}${ext}`,
     qr: `${entry.species}/qr/${entry.name}.png`,
     qrSvg: `${entry.species}/qr/${entry.name}.svg`,
+    qrDxf: `${entry.species}/qr/${entry.name}.dxf`,
     plate: hasTemplate ? `${entry.species}/plates/${entry.name}.jpg` : null,
   };
 }

@@ -11,6 +11,7 @@ import {
   downloadBlob,
   formatBytes,
   generateQrDataUrl,
+  generateQrDxf,
   generateQrSvg,
   yieldToEventLoop,
 } from '@/lib/qr.mjs';
@@ -46,8 +47,9 @@ export async function buildBundleZip(entries, baseUrl, onProgress) {
         base64: true,
       });
 
-      // Markup goes in as a plain string - JSZip encodes it as UTF-8.
+      // Markup and DXF text go in as plain strings - JSZip encodes them as UTF-8.
       zip.file(paths.qrSvg, await generateQrSvg(baseUrl, entry.slug));
+      zip.file(paths.qrDxf, await generateQrDxf(baseUrl, entry.slug));
 
       if (paths.plate) {
         zip.file(

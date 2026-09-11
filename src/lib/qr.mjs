@@ -13,6 +13,7 @@
  *   - one bad entry must never lose the other results.
  */
 
+import { qrToDxf } from './dxf.mjs';
 import { viewerUrl } from './naming.mjs';
 
 /**
@@ -66,6 +67,22 @@ async function renderQrSvgString(text, options) {
 }
 
 /**
+ * CAD renderer: DXF text built from the module matrix.
+ *
+ * `create` is the same call every renderer in `qrcode` makes first, with the same
+ * error-correction level, so this is the identical symbol - same version, same
+ * mask - as the PNG and SVG, not a re-encoding that happens to say the same thing.
+ */
+async function renderQrDxfString(text, options) {
+  const qrcode = await importQrcode();
+  const { modules } = qrcode.create(text, { errorCorrectionLevel: options.errorCorrectionLevel });
+  return qrToDxf(
+    { size: modules.size, isDark: (row, col) => modules.get(row, col) },
+    { size: options.width, margin: options.margin },
+  );
+}
+
+/**
  * Print settings. 512 px keeps a scannable module size on a label, margin 2 is
  * the minimum quiet zone most scanners tolerate, 'M' balances density against
  * ink smudge on cheap stock.
@@ -78,6 +95,9 @@ export const QR_OPTIONS = Object.freeze({
 
 /** MIME type for the vector QR, used for both Blob downloads and ZIP entries. */
 export const SVG_MIME = 'image/svg+xml;charset=utf-8';
+
+/** MIME type for the DXF; there is no registered type, this is the conventional one. */
+export const DXF_MIME = 'application/dxf';
 
 /** Items generated between progress reports / event-loop yields. */
 export const YIELD_EVERY = 25;
@@ -145,6 +165,17 @@ export function generateQrSvg(baseUrl, slug, options = {}) {
  */
 export function svgToBlob(svg) {
   return new Blob([svg], { type: SVG_MIME });
+}
+
+/** One QR DXF, as text, for a single manifest entry. */
+export function generateQrDxf(baseUrl, slug, options = {}) {
+  const { toDxf = renderQrDxfString, qrOptions = QR_OPTIONS } = options;
+  return toDxf(viewerUrl(baseUrl, slug), qrOptions);
+}
+
+/** Wrap DXF text in a Blob for download (browser only). */
+export function dxfToBlob(dxf) {
+  return new Blob([dxf], { type: DXF_MIME });
 }
 
 /**

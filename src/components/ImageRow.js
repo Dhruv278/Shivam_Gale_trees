@@ -2,11 +2,13 @@
 
 import { useState } from 'react';
 import Button from '@/components/Button';
-import { encodePath, svgQrName } from '@/lib/naming.mjs';
+import { dxfQrName, encodePath, svgQrName } from '@/lib/naming.mjs';
 import {
   downloadBlob,
   downloadDataUrl,
+  dxfToBlob,
   generateQrDataUrl,
+  generateQrDxf,
   generateQrSvg,
   svgToBlob,
 } from '@/lib/qr.mjs';
@@ -18,7 +20,7 @@ const THUMB_PX = 44;
 
 export default function ImageRow({ entry, baseUrl, url }) {
   const [copied, setCopied] = useState(false);
-  // Holds the format being generated ('png' | 'svg' | null) rather than a flag, so the
+  // Holds the format being generated ('png' | 'svg' | 'dxf' | null) rather than a flag, so the
   // spinner lands on the button that was actually clicked.
   const [busy, setBusy] = useState(null);
   const [failed, setFailed] = useState(false);
@@ -56,6 +58,12 @@ export default function ImageRow({ entry, baseUrl, url }) {
   function handleDownloadSvg() {
     return download('svg', async () =>
       downloadBlob(svgToBlob(await generateQrSvg(baseUrl, entry.slug)), svgQrName(entry.qrName)),
+    );
+  }
+
+  function handleDownloadDxf() {
+    return download('dxf', async () =>
+      downloadBlob(dxfToBlob(await generateQrDxf(baseUrl, entry.slug)), dxfQrName(entry.qrName)),
     );
   }
 
@@ -123,6 +131,15 @@ export default function ImageRow({ entry, baseUrl, url }) {
           aria-label={`Download QR code as SVG for ${entry.name}`}
         >
           {busy === 'svg' ? '…' : 'SVG'}
+        </Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={handleDownloadDxf}
+          disabled={busy !== null || !baseUrl}
+          aria-label={`Download QR code as DXF for ${entry.name}`}
+        >
+          {busy === 'dxf' ? '…' : 'DXF'}
         </Button>
       </div>
     </li>

@@ -1,5 +1,5 @@
 /**
- * THE production run: streams every tree's original image, QR (PNG + SVG), and
+ * THE production run: streams every tree's original image, QR (PNG, SVG, DXF), and
  * plate JPG to output/print/ in the same <Species>/{images,qr,plates} layout as
  * the portal ZIPs - but on disk, so 1,700 trees never live in browser memory.
  *
@@ -18,7 +18,7 @@ import QRCode from 'qrcode';
 import { bundlePaths } from '../src/lib/bundle.mjs';
 import { viewerUrl } from '../src/lib/naming.mjs';
 import { PLATE_TEMPLATES, drawPlate } from '../src/lib/plate.mjs';
-import { QR_OPTIONS } from '../src/lib/qr.mjs';
+import { QR_OPTIONS, generateQrDxf } from '../src/lib/qr.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const outRoot = join(root, 'output', 'print');
@@ -57,6 +57,9 @@ for (const [i, entry] of manifest.entries()) {
   // operator picks the format they need without a second lookup.
   const qrSvg = await QRCode.toString(url, { ...QR_OPTIONS, type: 'svg' });
   await writeFile(join(outRoot, paths.qrSvg), qrSvg, 'utf8');
+
+  // CAD sibling for the laser shop: the same symbol as closed polyline contours.
+  await writeFile(join(outRoot, paths.qrDxf), await generateQrDxf(baseUrl, entry.slug), 'utf8');
 
   if (plate) {
     if (!templates.has(entry.species)) {

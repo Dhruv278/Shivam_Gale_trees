@@ -186,6 +186,11 @@ export function svgQrName(qrName) {
   return `${splitName(qrName).base}.svg`;
 }
 
+/** "Aam 72.png" -> "Aam 72.dxf"; same derivation and the same reasoning as svgQrName. */
+export function dxfQrName(qrName) {
+  return `${splitName(qrName).base}.dxf`;
+}
+
 /** Absolute viewer URL encoded into a QR code. */
 export function viewerUrl(baseUrl, slug) {
   return `${baseUrl.replace(/\/+$/, '')}/view/${slug}`;

@@ -3,7 +3,7 @@
  * checks EVERY artifact, not a sample:
  *
  *   1. survey <-> manifest: every tree photographed exactly once, slugs unique
- *   2. every QR in output/print - PNG and SVG - decodes to exactly its viewer URL
+ *   2. every QR in output/print - PNG, SVG and DXF - decodes to exactly its viewer URL
  *   3. every plate JPG: correct size, the QR cropped OUT OF THE PLATE PIXELS
  *      decodes to the same URL, digits present in the number band, and no
  *      glyph pixel touches the QR box
@@ -23,6 +23,7 @@ import { createCanvas, loadImage } from '@napi-rs/canvas';
 import jsQR from 'jsqr';
 import { PNG } from 'pngjs';
 import { bundlePaths } from '../src/lib/bundle.mjs';
+import { drawDxf, parseDxf } from '../src/lib/dxf.mjs';
 import { encodePath, viewerUrl } from '../src/lib/naming.mjs';
 import { PLATE_TEMPLATES } from '../src/lib/plate.mjs';
 
@@ -63,18 +64,35 @@ function decodePngBuffer(buf) {
  * the point of shipping vector is that the printer will rescale it, so the audit
  * reads it at a size it was not authored at.
  */
-const SVG_AUDIT_SIZE = 1024;
+const VECTOR_AUDIT_SIZE = 1024;
 async function decodeSvgBuffer(buf) {
   const img = await loadImage(buf);
-  const canvas = createCanvas(SVG_AUDIT_SIZE, SVG_AUDIT_SIZE);
+  const canvas = createCanvas(VECTOR_AUDIT_SIZE, VECTOR_AUDIT_SIZE);
   const ctx = canvas.getContext('2d');
   // The SVG quiet zone is transparent; without a white ground it rasterises to
   // black and the finder patterns disappear.
   ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, SVG_AUDIT_SIZE, SVG_AUDIT_SIZE);
-  ctx.drawImage(img, 0, 0, SVG_AUDIT_SIZE, SVG_AUDIT_SIZE);
-  const data = ctx.getImageData(0, 0, SVG_AUDIT_SIZE, SVG_AUDIT_SIZE);
-  const r = jsQR(new Uint8ClampedArray(data.data), SVG_AUDIT_SIZE, SVG_AUDIT_SIZE);
+  ctx.fillRect(0, 0, VECTOR_AUDIT_SIZE, VECTOR_AUDIT_SIZE);
+  ctx.drawImage(img, 0, 0, VECTOR_AUDIT_SIZE, VECTOR_AUDIT_SIZE);
+  const data = ctx.getImageData(0, 0, VECTOR_AUDIT_SIZE, VECTOR_AUDIT_SIZE);
+  const r = jsQR(new Uint8ClampedArray(data.data), VECTOR_AUDIT_SIZE, VECTOR_AUDIT_SIZE);
+  return r?.data ?? null;
+}
+
+/**
+ * Fill a DXF's closed polylines the way a hatch tool would and decode the result
+ * with inversion DISABLED. The shop's own converted sample only scanned as a
+ * negative - a stray frame polyline flipped every module - so reading ours
+ * non-inverted is the check that a laser would mark a positive code.
+ */
+function decodeDxfText(text) {
+  const canvas = createCanvas(VECTOR_AUDIT_SIZE, VECTOR_AUDIT_SIZE);
+  const ctx = canvas.getContext('2d');
+  drawDxf(ctx, parseDxf(text), VECTOR_AUDIT_SIZE);
+  const data = ctx.getImageData(0, 0, VECTOR_AUDIT_SIZE, VECTOR_AUDIT_SIZE);
+  const r = jsQR(new Uint8ClampedArray(data.data), VECTOR_AUDIT_SIZE, VECTOR_AUDIT_SIZE, {
+    inversionAttempts: 'dontInvert',
+  });
   return r?.data ?? null;
 }
 
@@ -137,6 +155,15 @@ for (const entry of manifest) {
   } else {
     const decoded = await decodeSvgBuffer(await readFile(qrSvgPath));
     if (decoded !== url) fail(`${entry.name}: QR SVG decodes to "${decoded}", expected "${url}"`);
+  }
+
+  // 2c. standalone QR DXF - same code as CAD geometry; must read as a POSITIVE
+  const qrDxfPath = join(printRoot, paths.qrDxf);
+  if (!existsSync(qrDxfPath)) {
+    fail(`${entry.name}: missing QR DXF ${paths.qrDxf}`);
+  } else {
+    const decoded = decodeDxfText(await readFile(qrDxfPath, 'utf8'));
+    if (decoded !== url) fail(`${entry.name}: QR DXF decodes to "${decoded}", expected "${url}"`);
   }
 
   // 3. plate
