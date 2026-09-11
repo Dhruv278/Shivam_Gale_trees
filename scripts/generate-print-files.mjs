@@ -1,7 +1,11 @@
 /**
- * THE production run: streams every tree's original image, QR PNG, and plate
- * JPG to output/print/ in the same <Species>/{images,qr,plates} layout as the
- * portal ZIPs - but on disk, so 1,700 trees never live in browser memory.
+ * THE production run: streams every tree's original image, QR (PNG + SVG), and
+ * plate JPG to output/print/ in the same <Species>/{images,qr,plates} layout as
+ * the portal ZIPs - but on disk, so 1,700 trees never live in browser memory.
+ *
+ * The plate keeps compositing the PNG: a plate is a raster JPEG, so rasterising
+ * the vector first would add a conversion step to an already-audited path for no
+ * gain. The SVG is an additional deliverable, not a new input.
  *
  * Usage: node scripts/generate-print-files.mjs https://final-domain
  * The base URL is explicit and validated - these files go to a printer.
@@ -48,6 +52,11 @@ for (const [i, entry] of manifest.entries()) {
   const qrOut = join(outRoot, paths.qr);
   await mkdir(dirname(qrOut), { recursive: true });
   await writeFile(qrOut, qrBuffer);
+
+  // Vector sibling for the printer. Same folder, same basename, so a press
+  // operator picks the format they need without a second lookup.
+  const qrSvg = await QRCode.toString(url, { ...QR_OPTIONS, type: 'svg' });
+  await writeFile(join(outRoot, paths.qrSvg), qrSvg, 'utf8');
 
   if (plate) {
     if (!templates.has(entry.species)) {

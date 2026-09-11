@@ -2,6 +2,7 @@
  * The one place that knows the download bundle layout:
  *   <Species>/images/<Name>.<ext>  - the original photo bytes
  *   <Species>/qr/<Name>.png        - the QR PNG
+ *   <Species>/qr/<Name>.svg        - the same QR as vector, for the printer
  *   <Species>/plates/<Name>.jpg    - the composed plate
  * Same base name in all three folders so any file identifies its tree at a
  * glance. Browser ZIPs and the production disk output both use this.
@@ -13,6 +14,7 @@ export function bundlePaths(entry, hasTemplate) {
   return {
     image: `${entry.species}/images/${entry.name}${ext}`,
     qr: `${entry.species}/qr/${entry.name}.png`,
+    qrSvg: `${entry.species}/qr/${entry.name}.svg`,
     plate: hasTemplate ? `${entry.species}/plates/${entry.name}.jpg` : null,
   };
 }

@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { buildManifest, encodePath, isSupported, slugify, splitName, viewerUrl } from './naming.mjs';
+import {
+  buildManifest,
+  encodePath,
+  isSupported,
+  slugify,
+  splitName,
+  svgQrName,
+  viewerUrl,
+} from './naming.mjs';
 
 describe('encodePath', () => {
   it('encodes each segment but keeps folder separators', () => {
@@ -207,5 +215,22 @@ describe('slug stability across rebuilds (the lock)', () => {
     const first = buildManifest(['Amaltas.jpg']);
     const gone = buildManifest([], first.lock);
     expect(gone.warnings.some((w) => w.includes('Retired') && w.includes('amaltas'))).toBe(true);
+  });
+});
+
+describe('svgQrName', () => {
+  it('swaps the locked .png name for .svg, leaving the basename verbatim', () => {
+    expect(svgQrName('Aam 72.png')).toBe('Aam 72.svg');
+    expect(svgQrName('Fishtail plam.png')).toBe('Fishtail plam.svg');
+  });
+
+  // The lock issues collision-suffixed names like "Front-2.png"; the SVG must
+  // inherit that exact basename or the two formats would name different trees.
+  it('preserves a collision suffix', () => {
+    expect(svgQrName('Front-2.png')).toBe('Front-2.svg');
+  });
+
+  it('only replaces the final extension on names containing dots', () => {
+    expect(svgQrName('Badam -01.v2.png')).toBe('Badam -01.v2.svg');
   });
 });

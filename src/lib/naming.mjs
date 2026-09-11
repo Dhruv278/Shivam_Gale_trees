@@ -173,6 +173,19 @@ export function buildManifest(fileNames, lock = EMPTY_LOCK) {
   };
 }
 
+/**
+ * "Aam 72.png" -> "Aam 72.svg".
+ *
+ * The vector QR is a second rendering of a code the lock has already named, so its
+ * filename is DERIVED from `qrName` rather than assigned. Issuing SVG names through
+ * `buildManifest` would put a second entry in the lock per tree and let the two
+ * formats drift apart under collision suffixes - the PNG landing on "Front-2.png"
+ * while the SVG took a free "Front.svg", i.e. two files naming different trees.
+ */
+export function svgQrName(qrName) {
+  return `${splitName(qrName).base}.svg`;
+}
+
 /** Absolute viewer URL encoded into a QR code. */
 export function viewerUrl(baseUrl, slug) {
   return `${baseUrl.replace(/\/+$/, '')}/view/${slug}`;

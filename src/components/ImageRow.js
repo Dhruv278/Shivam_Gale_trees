@@ -2,8 +2,14 @@
 
 import { useState } from 'react';
 import Button from '@/components/Button';
-import { encodePath } from '@/lib/naming.mjs';
-import { downloadDataUrl, generateQrDataUrl } from '@/lib/qr.mjs';
+import { encodePath, svgQrName } from '@/lib/naming.mjs';
+import {
+  downloadBlob,
+  downloadDataUrl,
+  generateQrDataUrl,
+  generateQrSvg,
+  svgToBlob,
+} from '@/lib/qr.mjs';
 
 const COPIED_MS = 1400;
 
@@ -12,7 +18,9 @@ const THUMB_PX = 44;
 
 export default function ImageRow({ entry, baseUrl, url }) {
   const [copied, setCopied] = useState(false);
-  const [busy, setBusy] = useState(false);
+  // Holds the format being generated ('png' | 'svg' | null) rather than a flag, so the
+  // spinner lands on the button that was actually clicked.
+  const [busy, setBusy] = useState(null);
   const [failed, setFailed] = useState(false);
 
   async function handleCopy() {
@@ -26,17 +34,29 @@ export default function ImageRow({ entry, baseUrl, url }) {
     }
   }
 
-  async function handleDownload() {
-    setBusy(true);
+  /** Shared generate-then-save wrapper so both formats report failure identically. */
+  async function download(format, save) {
+    setBusy(format);
     setFailed(false);
     try {
-      const dataUrl = await generateQrDataUrl(baseUrl, entry.slug);
-      downloadDataUrl(dataUrl, entry.qrName);
+      await save();
     } catch {
       setFailed(true);
     } finally {
-      setBusy(false);
+      setBusy(null);
     }
+  }
+
+  function handleDownload() {
+    return download('png', async () =>
+      downloadDataUrl(await generateQrDataUrl(baseUrl, entry.slug), entry.qrName),
+    );
+  }
+
+  function handleDownloadSvg() {
+    return download('svg', async () =>
+      downloadBlob(svgToBlob(await generateQrSvg(baseUrl, entry.slug)), svgQrName(entry.qrName)),
+    );
   }
 
   return (
@@ -90,10 +110,19 @@ export default function ImageRow({ entry, baseUrl, url }) {
           size="sm"
           variant="secondary"
           onClick={handleDownload}
-          disabled={busy || !baseUrl}
-          aria-label={`Download QR code for ${entry.name}`}
+          disabled={busy !== null || !baseUrl}
+          aria-label={`Download QR code as PNG for ${entry.name}`}
         >
-          {busy ? '…' : 'Download QR'}
+          {busy === 'png' ? '…' : 'Download QR'}
+        </Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={handleDownloadSvg}
+          disabled={busy !== null || !baseUrl}
+          aria-label={`Download QR code as SVG for ${entry.name}`}
+        >
+          {busy === 'svg' ? '…' : 'SVG'}
         </Button>
       </div>
     </li>

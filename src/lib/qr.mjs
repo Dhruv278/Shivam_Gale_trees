@@ -53,6 +53,19 @@ async function renderQrDataUrl(text, options) {
 }
 
 /**
+ * Vector renderer: SVG markup as a string.
+ *
+ * Same options object as the PNG path, so both formats of a tree's code are the
+ * same symbol at the same error-correction level - `width` becomes the SVG's
+ * width/height attributes while the viewBox stays in module units, which is what
+ * lets a printer rescale it without resampling.
+ */
+async function renderQrSvgString(text, options) {
+  const qrcode = await importQrcode();
+  return qrcode.toString(text, { ...options, type: 'svg' });
+}
+
+/**
  * Print settings. 512 px keeps a scannable module size on a label, margin 2 is
  * the minimum quiet zone most scanners tolerate, 'M' balances density against
  * ink smudge on cheap stock.
@@ -62,6 +75,9 @@ export const QR_OPTIONS = Object.freeze({
   margin: 2,
   errorCorrectionLevel: 'M',
 });
+
+/** MIME type for the vector QR, used for both Blob downloads and ZIP entries. */
+export const SVG_MIME = 'image/svg+xml;charset=utf-8';
 
 /** Items generated between progress reports / event-loop yields. */
 export const YIELD_EVERY = 25;
@@ -112,6 +128,23 @@ export function yieldToEventLoop() {
 export function generateQrDataUrl(baseUrl, slug, options = {}) {
   const { toDataURL = renderQrDataUrl, qrOptions = QR_OPTIONS } = options;
   return toDataURL(viewerUrl(baseUrl, slug), qrOptions);
+}
+
+/** One QR SVG, as markup, for a single manifest entry. */
+export function generateQrSvg(baseUrl, slug, options = {}) {
+  const { toSvg = renderQrSvgString, qrOptions = QR_OPTIONS } = options;
+  return toSvg(viewerUrl(baseUrl, slug), qrOptions);
+}
+
+/**
+ * Wrap QR markup in a Blob for download (browser only).
+ *
+ * The charset is explicit because the markup is handed over as a JS string: without
+ * it a browser saving the Blob may tag the file with the page's encoding, and a
+ * mislabelled SVG can render as text in a print shop's viewer.
+ */
+export function svgToBlob(svg) {
+  return new Blob([svg], { type: SVG_MIME });
 }
 
 /**

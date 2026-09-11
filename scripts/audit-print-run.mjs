@@ -3,7 +3,7 @@
  * checks EVERY artifact, not a sample:
  *
  *   1. survey <-> manifest: every tree photographed exactly once, slugs unique
- *   2. every QR PNG in output/print decodes to exactly its viewer URL
+ *   2. every QR in output/print - PNG and SVG - decodes to exactly its viewer URL
  *   3. every plate JPG: correct size, the QR cropped OUT OF THE PLATE PIXELS
  *      decodes to the same URL, digits present in the number band, and no
  *      glyph pixel touches the QR box
@@ -57,6 +57,27 @@ function decodePngBuffer(buf) {
   return r?.data ?? null;
 }
 
+/**
+ * Rasterise a QR SVG and decode it, so the vector file is verified as a scannable
+ * symbol rather than merely as well-formed XML. Rendered at 2x its nominal size:
+ * the point of shipping vector is that the printer will rescale it, so the audit
+ * reads it at a size it was not authored at.
+ */
+const SVG_AUDIT_SIZE = 1024;
+async function decodeSvgBuffer(buf) {
+  const img = await loadImage(buf);
+  const canvas = createCanvas(SVG_AUDIT_SIZE, SVG_AUDIT_SIZE);
+  const ctx = canvas.getContext('2d');
+  // The SVG quiet zone is transparent; without a white ground it rasterises to
+  // black and the finder patterns disappear.
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, SVG_AUDIT_SIZE, SVG_AUDIT_SIZE);
+  ctx.drawImage(img, 0, 0, SVG_AUDIT_SIZE, SVG_AUDIT_SIZE);
+  const data = ctx.getImageData(0, 0, SVG_AUDIT_SIZE, SVG_AUDIT_SIZE);
+  const r = jsQR(new Uint8ClampedArray(data.data), SVG_AUDIT_SIZE, SVG_AUDIT_SIZE);
+  return r?.data ?? null;
+}
+
 async function decodePlateQr(platePath, plate) {
   const img = await loadImage(platePath);
   if (img.width !== plate.width || img.height !== plate.height) {
@@ -107,6 +128,15 @@ for (const entry of manifest) {
   } else {
     const decoded = decodePngBuffer(await readFile(qrPath));
     if (decoded !== url) fail(`${entry.name}: QR decodes to "${decoded}", expected "${url}"`);
+  }
+
+  // 2b. standalone QR SVG - same code, vector
+  const qrSvgPath = join(printRoot, paths.qrSvg);
+  if (!existsSync(qrSvgPath)) {
+    fail(`${entry.name}: missing QR SVG ${paths.qrSvg}`);
+  } else {
+    const decoded = await decodeSvgBuffer(await readFile(qrSvgPath));
+    if (decoded !== url) fail(`${entry.name}: QR SVG decodes to "${decoded}", expected "${url}"`);
   }
 
   // 3. plate
