@@ -10,6 +10,7 @@
     "dev": "next dev",
     "prebuild": "node scripts/build-manifest.mjs",
     "build": "next build",
+    "postbuild": "node scripts/prune-export.mjs",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run"

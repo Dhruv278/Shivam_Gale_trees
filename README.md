@@ -100,7 +100,7 @@ ever be silently re-pointed).
 | Command | Does |
 |---|---|
 | `npm run dev` | Rebuild manifest, start dev server |
-| `npm run build` | Rebuild manifest, production build, prerender every viewer page |
+| `npm run build` | Rebuild manifest, production build, prerender every viewer page, drop unused navigation payloads |
 | `npm run manifest` | Rebuild `src/data/manifest.json` only |
 | `npm run import-survey` | Excel → `src/data/trees.json` (run when the Excel changes) |
 | `npm run verify-print` | Printability report (photo + template coverage per species) |
